@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "Magali Berdah",
+    "slug": "magali-berdah-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.magaliberdah.marketplace",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "La caméra permet d’ajouter des photos aux annonces.",
+        "NSPhotoLibraryUsageDescription": "Votre photothèque permet d’ajouter des photos aux annonces."
+      }
+    },
+    "android": {
+      "package": "com.magaliberdah.marketplace",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#F6F1E9",
+        "foregroundImage": "./assets/icon.png"
+      },
+      "predictiveBackGestureEnabled": true
+    },
+    "scheme": "magaliberdah",
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font"
+    ]
+  }
+}
