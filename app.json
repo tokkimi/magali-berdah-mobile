@@ -30,6 +30,18 @@
     },
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "14d1a717-4d4f-4dc5-87fc-3437ad8774b1"
+      }
+    },
+    "owner": "magaliberdahmobiles-team",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/14d1a717-4d4f-4dc5-87fc-3437ad8774b1"
+    }
   }
 }
