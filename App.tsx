@@ -1,66 +1,1729 @@
-import React,{createContext,useContext,useEffect,useMemo,useState}from'react';
-import{Alert,FlatList,Image,ImageBackground,Platform,Pressable,ScrollView,StyleSheet,Text,TextInput,useWindowDimensions,View}from'react-native';
-import{NavigationContainer,DefaultTheme}from'@react-navigation/native';
-import{createNativeStackNavigator}from'@react-navigation/native-stack';
-import{createBottomTabNavigator}from'@react-navigation/bottom-tabs';
-import{SafeAreaProvider,SafeAreaView}from'react-native-safe-area-context';
-import{LinearGradient}from'expo-linear-gradient';
-import*as Haptics from'expo-haptics';
-import{Feather,Ionicons}from'@expo/vector-icons';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import {
+  Alert,
+  FlatList,
+  Image,
+  ImageBackground,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  useWindowDimensions,
+  View,
+} from "react-native";
+import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
+import * as Haptics from "expo-haptics";
+import { Feather, Ionicons } from "@expo/vector-icons";
 
-const C={ink:'#17140f',muted:'#7c746a',gold:'#bd955a',cream:'#f6f1e9',paper:'#fffdf9',line:'#e7dfd3',red:'#a7322d',white:'#fff'};
-type Product={id:string;brand:string;title:string;image:string;price:number;bid?:number;auction?:boolean;ends?:string;category:string;certified:boolean;condition:string};
-const P:Product[]=[
-{id:'1',brand:'SAINT LAURENT',title:'Icare matelassé bordeaux',image:'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=900&q=90',price:1200,bid:1460,auction:true,ends:'02h 18m',category:'Sacs',certified:true,condition:'Excellent'},
-{id:'2',brand:'FENDI',title:'Baguette denim FF',image:'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=900&q=90',price:1800,bid:2150,auction:true,ends:'04h 42m',category:'Sacs',certified:true,condition:'Excellent'},
-{id:'3',brand:'HERMÈS',title:'Birkin 30 Togo fauve',image:'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=900&q=90',price:8500,bid:9200,auction:true,ends:'1j 08h',category:'Sacs',certified:true,condition:'Excellent'},
-{id:'4',brand:'CARTIER',title:'Tank Must acier',image:'https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=900&q=90',price:1800,category:'Montres',certified:true,condition:'Très bon'},
-{id:'5',brand:'CHANEL',title:'Robe tweed rose poudré',image:'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=900&q=90',price:3200,category:'Mode',certified:true,condition:'Excellent'},
-{id:'6',brand:'THE ROW',title:'Escarpins crème talon bloc',image:'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=900&q=90',price:280,category:'Chaussures',certified:true,condition:'Excellent'},
-{id:'7',brand:'JACQUEMUS',title:'Le Bambino cuir ivoire',image:'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=900&q=90',price:490,category:'Sacs',certified:true,condition:'Comme neuf'},
-{id:'8',brand:'DIOR',title:'Lady Dior cannage noir',image:'https://images.unsplash.com/photo-1559563458-527698bf5295?w=900&q=90',price:4100,category:'Sacs',certified:true,condition:'Excellent'},
-{id:'9',brand:'ROLEX',title:'Datejust cadran champagne',image:'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=900&q=90',price:7200,category:'Montres',certified:true,condition:'Très bon'},
-{id:'10',brand:'LOUIS VUITTON',title:'Malle souple monogramme',image:'https://images.unsplash.com/photo-1585488434455-1e7b6b37cbd6?w=900&q=90',price:2450,category:'Sacs',certified:true,condition:'Excellent'},
-{id:'11',brand:'CELINE',title:'Lunettes Triomphe écaille',image:'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=900&q=90',price:340,category:'Mode',certified:true,condition:'Comme neuf'},
-{id:'12',brand:'BOTTEGA VENETA',title:'Mules Lido tressées',image:'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=900&q=90',price:390,category:'Chaussures',certified:true,condition:'Excellent'}];
-const Stack=createNativeStackNavigator(),Tabs=createBottomTabNavigator();
-const money=(n:number)=>new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);
-type State={favorites:Set<string>;toggle:(id:string)=>void;cart:Product[];add:(p:Product)=>void};
-const Shop=createContext<State>({favorites:new Set(),toggle:()=>{},cart:[],add:()=>{}}),useShop=()=>useContext(Shop);
+const C = {
+  ink: "#17140f",
+  muted: "#7c746a",
+  gold: "#bd955a",
+  cream: "#f6f1e9",
+  paper: "#fffdf9",
+  line: "#e7dfd3",
+  red: "#a7322d",
+  white: "#fff",
+};
+type Product = {
+  id: string;
+  brand: string;
+  title: string;
+  image: string;
+  price: number;
+  bid?: number;
+  auction?: boolean;
+  ends?: string;
+  category: string;
+  certified: boolean;
+  condition: string;
+};
+const P: Product[] = [
+  {
+    id: "1",
+    brand: "SAINT LAURENT",
+    title: "Icare matelassé bordeaux",
+    image:
+      "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=900&q=90",
+    price: 1200,
+    bid: 1460,
+    auction: true,
+    ends: "02h 18m",
+    category: "Sacs",
+    certified: true,
+    condition: "Excellent",
+  },
+  {
+    id: "2",
+    brand: "FENDI",
+    title: "Baguette denim FF",
+    image:
+      "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=900&q=90",
+    price: 1800,
+    bid: 2150,
+    auction: true,
+    ends: "04h 42m",
+    category: "Sacs",
+    certified: true,
+    condition: "Excellent",
+  },
+  {
+    id: "3",
+    brand: "HERMÈS",
+    title: "Birkin 30 Togo fauve",
+    image:
+      "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=900&q=90",
+    price: 8500,
+    bid: 9200,
+    auction: true,
+    ends: "1j 08h",
+    category: "Sacs",
+    certified: true,
+    condition: "Excellent",
+  },
+  {
+    id: "4",
+    brand: "CARTIER",
+    title: "Tank Must acier",
+    image:
+      "https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=900&q=90",
+    price: 1800,
+    category: "Montres",
+    certified: true,
+    condition: "Très bon",
+  },
+  {
+    id: "5",
+    brand: "CHANEL",
+    title: "Robe tweed rose poudré",
+    image:
+      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=900&q=90",
+    price: 3200,
+    category: "Mode",
+    certified: true,
+    condition: "Excellent",
+  },
+  {
+    id: "6",
+    brand: "THE ROW",
+    title: "Escarpins crème talon bloc",
+    image:
+      "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=900&q=90",
+    price: 280,
+    category: "Chaussures",
+    certified: true,
+    condition: "Excellent",
+  },
+  {
+    id: "7",
+    brand: "JACQUEMUS",
+    title: "Le Bambino cuir ivoire",
+    image:
+      "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=900&q=90",
+    price: 490,
+    category: "Sacs",
+    certified: true,
+    condition: "Comme neuf",
+  },
+  {
+    id: "8",
+    brand: "DIOR",
+    title: "Lady Dior cannage noir",
+    image:
+      "https://images.unsplash.com/photo-1559563458-527698bf5295?w=900&q=90",
+    price: 4100,
+    category: "Sacs",
+    certified: true,
+    condition: "Excellent",
+  },
+  {
+    id: "9",
+    brand: "ROLEX",
+    title: "Datejust cadran champagne",
+    image:
+      "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=900&q=90",
+    price: 7200,
+    category: "Montres",
+    certified: true,
+    condition: "Très bon",
+  },
+  {
+    id: "10",
+    brand: "LOUIS VUITTON",
+    title: "Malle souple monogramme",
+    image:
+      "https://images.unsplash.com/photo-1585488434455-1e7b6b37cbd6?w=900&q=90",
+    price: 2450,
+    category: "Sacs",
+    certified: true,
+    condition: "Excellent",
+  },
+  {
+    id: "11",
+    brand: "CELINE",
+    title: "Lunettes Triomphe écaille",
+    image:
+      "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=900&q=90",
+    price: 340,
+    category: "Mode",
+    certified: true,
+    condition: "Comme neuf",
+  },
+  {
+    id: "12",
+    brand: "BOTTEGA VENETA",
+    title: "Mules Lido tressées",
+    image:
+      "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=900&q=90",
+    price: 390,
+    category: "Chaussures",
+    certified: true,
+    condition: "Excellent",
+  },
+];
+const Stack = createNativeStackNavigator(),
+  Tabs = createBottomTabNavigator();
+const money = (n: number) =>
+  new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(n);
+type State = {
+  favorites: Set<string>;
+  toggle: (id: string) => void;
+  cart: Product[];
+  add: (p: Product) => void;
+};
+const Shop = createContext<State>({
+    favorites: new Set(),
+    toggle: () => {},
+    cart: [],
+    add: () => {},
+  }),
+  useShop = () => useContext(Shop);
 
-function Header({navigation,title='MAGALI BERDAH'}:any){const{cart}=useShop();return <View style={s.header}><Pressable onPress={()=>navigation.navigate('Search')}><Feather name="search" size={21}/></Pressable><Text style={s.wordmark}>{title}</Text><Pressable onPress={()=>navigation.navigate('Cart')}><Feather name="shopping-bag" size={21}/>{cart.length>0&&<View style={s.badge}><Text style={s.badgeText}>{cart.length}</Text></View>}</Pressable></View>}
-function Card({item,navigation,wide=false}:any){const{favorites,toggle}=useShop();return <Pressable style={[s.card,wide&&s.wide]} onPress={()=>navigation.navigate('Product',{id:item.id})}><View><Image source={{uri:item.image}} style={[s.cardImg,wide&&s.wideImg]}/><Pressable style={s.heart} onPress={()=>{Haptics.selectionAsync();toggle(item.id)}}><Ionicons name={favorites.has(item.id)?'heart':'heart-outline'} size={19} color={favorites.has(item.id)?C.red:C.ink}/></Pressable>{item.auction&&<View style={s.pill}><View style={s.dot}/><Text style={s.pillText}>{item.ends}</Text></View>}</View><Text style={s.brand}>{item.brand}</Text><Text numberOfLines={1} style={s.productTitle}>{item.title}</Text><Text style={s.price}>{item.auction?`Enchère ${money(item.bid||item.price)}`:money(item.price)}</Text></Pressable>}
-function Trust({icon,title,dark=false}:any){return <View style={s.trust}><Ionicons name={icon} size={20} color={C.gold}/><Text style={[s.trustText,dark&&{color:C.white}]}>{title}</Text></View>}
-function Countdown(){const[left,setLeft]=useState(2*3600+18*60+34);useEffect(()=>{const t=setInterval(()=>setLeft(v=>v>0?v-1:24*3600),1000);return()=>clearInterval(t)},[]);const units=[['HEURES',Math.floor(left/3600)],['MIN',Math.floor(left%3600/60)],['SEC',left%60]];return <View style={s.countdown}>{units.map(([label,value],i)=><React.Fragment key={String(label)}>{i>0&&<Text style={s.countSep}>:</Text>}<View style={s.countUnit}><Text style={s.countNumber}>{String(value).padStart(2,'0')}</Text><Text style={s.countLabel}>{label}</Text></View></React.Fragment>)}</View>}
-function StoryRail({navigation}:any){const stories=[['Vente privée',P[2]],['Sacs iconiques',P[0]],['Montres',P[3]],['Nouveautés',P[4]],['Moins de 500 €',P[5]]];return <View style={s.storyWrap}><View style={s.between}><Text style={s.storyHeading}>Explorer</Text><Text style={s.link}>Toutes les catégories ›</Text></View><ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.storyRow}>{stories.map(([label,p]:any)=><Pressable key={label} style={s.story} onPress={()=>navigation.navigate('Product',{id:p.id})}><LinearGradient colors={[C.gold,'#ead6b5']} style={s.storyRing}><Image source={{uri:p.image}} style={s.storyImg}/></LinearGradient><Text numberOfLines={2} style={s.storyLabel}>{label}</Text></Pressable>)}</ScrollView></View>}
-function Editorial({navigation}:any){return <View style={s.editorial}><Text style={s.kickerLight}>LE JOURNAL MAGALI</Text><Text style={s.editorialTitle}>Les pièces qui traversent le temps</Text><Text style={s.editorialText}>Conseils, histoires de maisons et secrets d’authentification par nos experts.</Text><View style={s.editorialGrid}><Pressable style={s.editorialCard} onPress={()=>navigation.navigate('Catalogue')}><Image source={{uri:P[3].image}} style={s.editorialImg}/><Text style={s.editorialCardTitle}>L’art de choisir une montre</Text></Pressable><Pressable style={s.editorialCard} onPress={()=>navigation.navigate('Catalogue')}><Image source={{uri:P[4].image}} style={s.editorialImg}/><Text style={s.editorialCardTitle}>Les icônes de saison</Text></Pressable></View></View>}
-function MoreCard({navigation,count}:any){return <Pressable style={s.moreCard} onPress={()=>navigation.navigate('Catalogue')}><View style={s.moreIcon}><Ionicons name="arrow-forward" size={22} color={C.gold}/></View><Text style={s.moreTitle}>Voir toute{`\n`}la sélection</Text><Text style={s.moreCount}>{count}+ pièces</Text></Pressable>}
-function Section({title,label,items,navigation}:any){return <View style={s.section}><Text style={s.kicker}>{label}</Text><View style={s.between}><Text style={s.sectionTitle}>{title}</Text><Pressable style={s.seeAll} onPress={()=>navigation.navigate('Catalogue')}><Text style={s.seeAllText}>Voir tout</Text><Ionicons name="arrow-forward" size={13} color={C.gold}/></Pressable></View><FlatList horizontal data={[...items,{id:`more-${label}`,more:true}]} keyExtractor={(x:any)=>x.id} showsHorizontalScrollIndicator={false} snapToInterval={180} decelerationRate="fast" contentContainerStyle={{gap:12,paddingRight:20}} renderItem={({item}:any)=>item.more?<MoreCard navigation={navigation} count={items.length*12}/>:<Card item={item} navigation={navigation}/>} /></View>}
-function Home({navigation}:any){return <SafeAreaView style={s.safe}><Header navigation={navigation}/><ScrollView showsVerticalScrollIndicator={false}><ImageBackground source={require('./assets/hero-original.jpeg')} style={s.hero} imageStyle={{resizeMode:'cover',width:'100%',height:'100%'}}><LinearGradient colors={['rgba(10,8,5,.02)','rgba(10,8,5,.18)','rgba(10,8,5,.92)']} style={s.heroShade}><View style={s.heroTag}><Text style={s.heroTagText}>L’UNIVERS MAGALI BERDAH</Text></View><Text style={s.heroTitle}>L’exception{`\n`}à portée de main.</Text><Text style={s.heroSub}>Mode, pièces rares et ventes exclusives sélectionnées pour vous.</Text><View style={s.heroActions}><Pressable style={s.goldBtn} onPress={()=>navigation.navigate('Catalogue')}><Text style={s.btnText}>DÉCOUVRIR</Text></Pressable><Pressable style={s.ghostBtn} onPress={()=>navigation.navigate('Enchères')}><Text style={s.ghostText}>ENCHÈRES</Text></Pressable></View></LinearGradient></ImageBackground><StoryRail navigation={navigation}/><View style={s.exclusive}><View style={s.lockCircle}><Ionicons name="lock-closed" size={17} color={C.gold}/></View><Text style={s.kicker}>VENTE EXCLUSIVE · ACCÈS LIMITÉ</Text><Text style={[s.sectionTitle,{color:C.white,textAlign:'center'}]}>La sélection ferme bientôt</Text><Text style={[s.body,{color:'#aaa',textAlign:'center'}]}>Des pièces d’exception disponibles pendant quelques heures seulement.</Text><Countdown/><Pressable style={s.exclusiveBtn} onPress={()=>navigation.navigate('Catalogue')}><Text style={s.exclusiveBtnText}>ENTRER DANS LA VENTE  →</Text></Pressable></View><Section title="Enchères en direct" label="DERNIÈRES CHANCES" items={P.filter(x=>x.auction)} navigation={navigation}/><View style={s.marquee}><Text style={s.marqueeText}>AUTHENTIFIÉ  ·  LIVRAISON SUIVIE  ·  PAIEMENT SÉCURISÉ  ·  RETOURS 14 JOURS</Text></View><Section title="La sélection de Magali" label="COUPS DE CŒUR" items={[P[4],P[7],P[3]]} navigation={navigation}/><Section title="Les iconiques" label="PIÈCES QUI TRAVERSENT LE TEMPS" items={[P[8],P[9],P[2]]} navigation={navigation}/><View style={s.softBanner}><Ionicons name="sparkles" size={19} color={C.gold}/><View style={{flex:1}}><Text style={s.softTitle}>Le luxe à moins de 500 €</Text><Text style={s.softText}>Notre sélection accessible, toujours authentifiée.</Text></View><Ionicons name="arrow-forward" size={19} color={C.gold}/></View><Section title="Petits plaisirs, grand style" label="MOINS DE 500 €" items={[P[5],P[6],P[10],P[11]]} navigation={navigation}/><Editorial navigation={navigation}/><View style={s.trustBlock}><Trust dark icon="shield-checkmark-outline" title="Authenticité garantie par nos experts"/><Trust dark icon="diamond-outline" title="Une sélection rare et exigeante"/><Trust dark icon="chatbubble-ellipses-outline" title="Conciergerie à votre écoute"/></View></ScrollView></SafeAreaView>}
+function Header({ navigation, title = "MAGALI BERDAH" }: any) {
+  const { cart } = useShop();
+  return (
+    <View style={s.header}>
+      <Pressable onPress={() => navigation.navigate("Search")}>
+        <Feather name="search" size={21} />
+      </Pressable>
+      <Text style={s.wordmark}>{title}</Text>
+      <Pressable onPress={() => navigation.navigate("Cart")}>
+        <Feather name="shopping-bag" size={21} />
+        {cart.length > 0 && (
+          <View style={s.badge}>
+            <Text style={s.badgeText}>{cart.length}</Text>
+          </View>
+        )}
+      </Pressable>
+    </View>
+  );
+}
+function Card({ item, navigation, wide = false }: any) {
+  const { favorites, toggle } = useShop();
+  return (
+    <Pressable
+      style={[s.card, wide && s.wide]}
+      onPress={() => navigation.navigate("Product", { id: item.id })}
+    >
+      <View>
+        <Image
+          source={{ uri: item.image }}
+          style={[s.cardImg, wide && s.wideImg]}
+        />
+        <Pressable
+          style={s.heart}
+          onPress={() => {
+            Haptics.selectionAsync();
+            toggle(item.id);
+          }}
+        >
+          <Ionicons
+            name={favorites.has(item.id) ? "heart" : "heart-outline"}
+            size={19}
+            color={favorites.has(item.id) ? C.red : C.ink}
+          />
+        </Pressable>
+        {item.auction && (
+          <View style={s.pill}>
+            <View style={s.dot} />
+            <Text style={s.pillText}>{item.ends}</Text>
+          </View>
+        )}
+      </View>
+      <Text style={s.brand}>{item.brand}</Text>
+      <Text numberOfLines={1} style={s.productTitle}>
+        {item.title}
+      </Text>
+      <Text style={s.price}>
+        {item.auction
+          ? `Enchère ${money(item.bid || item.price)}`
+          : money(item.price)}
+      </Text>
+    </Pressable>
+  );
+}
+function Trust({ icon, title, dark = false }: any) {
+  return (
+    <View style={s.trust}>
+      <Ionicons name={icon} size={20} color={C.gold} />
+      <Text style={[s.trustText, dark && { color: C.white }]}>{title}</Text>
+    </View>
+  );
+}
+function Countdown() {
+  const [left, setLeft] = useState(2 * 3600 + 18 * 60 + 34);
+  useEffect(() => {
+    const t = setInterval(
+      () => setLeft((v) => (v > 0 ? v - 1 : 24 * 3600)),
+      1000,
+    );
+    return () => clearInterval(t);
+  }, []);
+  const units = [
+    ["HEURES", Math.floor(left / 3600)],
+    ["MIN", Math.floor((left % 3600) / 60)],
+    ["SEC", left % 60],
+  ];
+  return (
+    <View style={s.countdown}>
+      {units.map(([label, value], i) => (
+        <React.Fragment key={String(label)}>
+          {i > 0 && <Text style={s.countSep}>:</Text>}
+          <View style={s.countUnit}>
+            <Text style={s.countNumber}>{String(value).padStart(2, "0")}</Text>
+            <Text style={s.countLabel}>{label}</Text>
+          </View>
+        </React.Fragment>
+      ))}
+    </View>
+  );
+}
+function StoryRail({ navigation }: any) {
+  const stories = [
+    ["Vente privée", P[2]],
+    ["Sacs iconiques", P[0]],
+    ["Montres", P[3]],
+    ["Nouveautés", P[4]],
+    ["Moins de 500 €", P[5]],
+  ];
+  return (
+    <View style={s.storyWrap}>
+      <View style={s.between}>
+        <Text style={s.storyHeading}>Explorer</Text>
+        <Text style={s.link}>Toutes les catégories ›</Text>
+      </View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={s.storyRow}
+      >
+        {stories.map(([label, p]: any) => (
+          <Pressable
+            key={label}
+            style={s.story}
+            onPress={() => navigation.navigate("Product", { id: p.id })}
+          >
+            <LinearGradient colors={[C.gold, "#ead6b5"]} style={s.storyRing}>
+              <Image source={{ uri: p.image }} style={s.storyImg} />
+            </LinearGradient>
+            <Text numberOfLines={2} style={s.storyLabel}>
+              {label}
+            </Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+    </View>
+  );
+}
+function Editorial({ navigation }: any) {
+  return (
+    <View style={s.editorial}>
+      <Text style={s.kickerLight}>LE JOURNAL MAGALI</Text>
+      <Text style={s.editorialTitle}>Les pièces qui traversent le temps</Text>
+      <Text style={s.editorialText}>
+        Conseils, histoires de maisons et secrets d’authentification par nos
+        experts.
+      </Text>
+      <View style={s.editorialGrid}>
+        <Pressable
+          style={s.editorialCard}
+          onPress={() => navigation.navigate("Catalogue")}
+        >
+          <Image source={{ uri: P[3].image }} style={s.editorialImg} />
+          <Text style={s.editorialCardTitle}>L’art de choisir une montre</Text>
+        </Pressable>
+        <Pressable
+          style={s.editorialCard}
+          onPress={() => navigation.navigate("Catalogue")}
+        >
+          <Image source={{ uri: P[4].image }} style={s.editorialImg} />
+          <Text style={s.editorialCardTitle}>Les icônes de saison</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+function MoreCard({ navigation, count }: any) {
+  return (
+    <Pressable
+      style={s.moreCard}
+      onPress={() => navigation.navigate("Catalogue")}
+    >
+      <View style={s.moreIcon}>
+        <Ionicons name="arrow-forward" size={22} color={C.gold} />
+      </View>
+      <Text style={s.moreTitle}>Voir toute{`\n`}la sélection</Text>
+      <Text style={s.moreCount}>{count}+ pièces</Text>
+    </Pressable>
+  );
+}
+function Section({ title, label, items, navigation }: any) {
+  return (
+    <View style={s.section}>
+      <Text style={s.kicker}>{label}</Text>
+      <View style={s.between}>
+        <Text style={s.sectionTitle}>{title}</Text>
+        <Pressable
+          style={s.seeAll}
+          onPress={() => navigation.navigate("Catalogue")}
+        >
+          <Text style={s.seeAllText}>Voir tout</Text>
+          <Ionicons name="arrow-forward" size={13} color={C.gold} />
+        </Pressable>
+      </View>
+      <FlatList
+        horizontal
+        data={[...items, { id: `more-${label}`, more: true }]}
+        keyExtractor={(x: any) => x.id}
+        showsHorizontalScrollIndicator={false}
+        snapToInterval={180}
+        decelerationRate="fast"
+        contentContainerStyle={{ gap: 12, paddingRight: 20 }}
+        renderItem={({ item }: any) =>
+          item.more ? (
+            <MoreCard navigation={navigation} count={items.length * 12} />
+          ) : (
+            <Card item={item} navigation={navigation} />
+          )
+        }
+      />
+    </View>
+  );
+}
+function Home({ navigation }: any) {
+  return (
+    <SafeAreaView style={s.safe}>
+      <Header navigation={navigation} />
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <ImageBackground
+          source={require("./assets/hero-original.jpeg")}
+          style={s.hero}
+          imageStyle={{ resizeMode: "cover", width: "100%", height: "100%" }}
+        >
+          <LinearGradient
+            colors={[
+              "rgba(10,8,5,.02)",
+              "rgba(10,8,5,.18)",
+              "rgba(10,8,5,.92)",
+            ]}
+            style={s.heroShade}
+          >
+            <View style={s.heroTag}>
+              <Text style={s.heroTagText}>L’UNIVERS MAGALI BERDAH</Text>
+            </View>
+            <Text style={s.heroTitle}>L’exception{`\n`}à portée de main.</Text>
+            <Text style={s.heroSub}>
+              Mode, pièces rares et ventes exclusives sélectionnées pour vous.
+            </Text>
+            <View style={s.heroActions}>
+              <Pressable
+                style={s.goldBtn}
+                onPress={() => navigation.navigate("Catalogue")}
+              >
+                <Text style={s.btnText}>DÉCOUVRIR</Text>
+              </Pressable>
+              <Pressable
+                style={s.ghostBtn}
+                onPress={() => navigation.navigate("Enchères")}
+              >
+                <Text style={s.ghostText}>ENCHÈRES</Text>
+              </Pressable>
+            </View>
+          </LinearGradient>
+        </ImageBackground>
+        <StoryRail navigation={navigation} />
+        <View style={s.exclusive}>
+          <View style={s.lockCircle}>
+            <Ionicons name="lock-closed" size={17} color={C.gold} />
+          </View>
+          <Text style={s.kicker}>VENTE EXCLUSIVE · ACCÈS LIMITÉ</Text>
+          <Text
+            style={[s.sectionTitle, { color: C.white, textAlign: "center" }]}
+          >
+            La sélection ferme bientôt
+          </Text>
+          <Text style={[s.body, { color: "#aaa", textAlign: "center" }]}>
+            Des pièces d’exception disponibles pendant quelques heures
+            seulement.
+          </Text>
+          <Countdown />
+          <Pressable
+            style={s.exclusiveBtn}
+            onPress={() => navigation.navigate("Catalogue")}
+          >
+            <Text style={s.exclusiveBtnText}>ENTRER DANS LA VENTE →</Text>
+          </Pressable>
+        </View>
+        <Section
+          title="Enchères en direct"
+          label="DERNIÈRES CHANCES"
+          items={P.filter((x) => x.auction)}
+          navigation={navigation}
+        />
+        <View style={s.marquee}>
+          <Text style={s.marqueeText}>
+            AUTHENTIFIÉ · LIVRAISON SUIVIE · PAIEMENT SÉCURISÉ · RETOURS 14
+            JOURS
+          </Text>
+        </View>
+        <Section
+          title="La sélection de Magali"
+          label="COUPS DE CŒUR"
+          items={[P[4], P[7], P[3]]}
+          navigation={navigation}
+        />
+        <Section
+          title="Les iconiques"
+          label="PIÈCES QUI TRAVERSENT LE TEMPS"
+          items={[P[8], P[9], P[2]]}
+          navigation={navigation}
+        />
+        <View style={s.softBanner}>
+          <Ionicons name="sparkles" size={19} color={C.gold} />
+          <View style={{ flex: 1 }}>
+            <Text style={s.softTitle}>Le luxe à moins de 500 €</Text>
+            <Text style={s.softText}>
+              Notre sélection accessible, toujours authentifiée.
+            </Text>
+          </View>
+          <Ionicons name="arrow-forward" size={19} color={C.gold} />
+        </View>
+        <Section
+          title="Petits plaisirs, grand style"
+          label="MOINS DE 500 €"
+          items={[P[5], P[6], P[10], P[11]]}
+          navigation={navigation}
+        />
+        <Editorial navigation={navigation} />
+        <View style={s.trustBlock}>
+          <Trust
+            dark
+            icon="shield-checkmark-outline"
+            title="Authenticité garantie par nos experts"
+          />
+          <Trust
+            dark
+            icon="diamond-outline"
+            title="Une sélection rare et exigeante"
+          />
+          <Trust
+            dark
+            icon="chatbubble-ellipses-outline"
+            title="Conciergerie à votre écoute"
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
 
-function Catalogue({navigation}:any){const[q,setQ]=useState(''),[cat,setCat]=useState('Tout');const cats=['Tout','Sacs','Mode','Montres','Chaussures'],data=P.filter(p=>(cat==='Tout'||p.category===cat)&&`${p.brand} ${p.title}`.toLowerCase().includes(q.toLowerCase()));return <SafeAreaView style={s.safe}><Header navigation={navigation} title="CATALOGUE"/><View style={s.search}><Feather name="search" size={18} color={C.muted}/><TextInput placeholder="Marque, pièce, catégorie…" value={q} onChangeText={setQ} style={s.searchInput}/><Feather name="sliders" size={18}/></View><View style={s.filterRail}><ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.chips}>{cats.map(c=><Pressable key={c} onPress={()=>setCat(c)} style={[s.chip,cat===c&&s.chipOn]}><Text style={[s.chipText,cat===c&&{color:C.white}]}>{c}</Text></Pressable>)}</ScrollView></View><FlatList style={s.catalogList} data={data} numColumns={2} columnWrapperStyle={s.catalogColumns} contentContainerStyle={s.grid} renderItem={({item})=><Card item={item} navigation={navigation} wide/>} ListHeaderComponent={<View style={s.resultHead}><Text style={s.result}>{data.length} pièces</Text><Text style={s.sort}>Trier : nouveautés⌄</Text></View>}/></SafeAreaView>}
-function Empty({icon,title,text,action,onPress}:any){return <View style={s.empty}><Ionicons name={icon} size={38} color={C.gold}/><Text style={s.emptyTitle}>{title}</Text><Text style={s.center}>{text}</Text><Pressable style={s.outline} onPress={onPress}><Text style={s.outlineText}>{action}</Text></Pressable></View>}
-function Favorites({navigation}:any){const{favorites}=useShop(),data=P.filter(x=>favorites.has(x.id));return <SafeAreaView style={s.safe}><Header navigation={navigation} title="FAVORIS"/>{data.length?<FlatList data={data} numColumns={2} columnWrapperStyle={{gap:12}} contentContainerStyle={s.grid} renderItem={({item})=><Card item={item} navigation={navigation} wide/>}/>:<Empty icon="heart-outline" title="Votre sélection personnelle" text="Enregistrez les pièces qui vous inspirent pour les retrouver ici." action="EXPLORER LE CATALOGUE" onPress={()=>navigation.navigate('Catalogue')}/>}</SafeAreaView>}
-function Auctions({navigation}:any){return <SafeAreaView style={s.safe}><Header navigation={navigation} title="ENCHÈRES"/><FlatList data={P.filter(x=>x.auction)} contentContainerStyle={{padding:20,gap:16}} ListHeaderComponent={<View><Text style={s.pageTitle}>Suivez chaque instant.</Text><Text style={s.body}>Vos enchères actives et les ventes qui se terminent bientôt.</Text></View>} renderItem={({item})=><Pressable style={s.bidCard} onPress={()=>navigation.navigate('Product',{id:item.id})}><Image source={{uri:item.image}} style={s.bidImg}/><View style={{flex:1}}><Text style={s.brand}>{item.brand}</Text><Text style={s.bidTitle}>{item.title}</Text><Text style={s.price}>{money(item.bid||item.price)}</Text><Text style={s.bidTime}>● Se termine dans {item.ends}</Text></View><Ionicons name="chevron-forward" size={18} color={C.muted}/></Pressable>}/></SafeAreaView>}
-function Account({navigation}:any){return <SafeAreaView style={s.safe}><Header navigation={navigation} title="MON COMPTE"/><ScrollView contentContainerStyle={{padding:20}}><View style={s.profile}><View style={s.avatar}><Text style={s.avatarText}>MB</Text></View><Text style={s.profileTitle}>Bienvenue</Text><Text style={s.center}>Connectez-vous pour suivre vos commandes, enchères et favoris sur tous vos appareils.</Text><Pressable style={s.blackBtn} onPress={()=>navigation.navigate('Login')}><Text style={s.btnText}>SE CONNECTER</Text></Pressable></View>{[['package','Mes commandes'],['hammer','Mes enchères'],['location','Mes adresses'],['card','Moyens de paiement'],['notifications','Notifications'],['help-circle','Aide & conciergerie']].map(([i,t])=><Pressable key={t} style={s.menu}><Ionicons name={`${i}-outline` as any} size={20}/><Text style={s.menuText}>{t}</Text><Ionicons name="chevron-forward" size={17} color={C.muted}/></Pressable>)}</ScrollView></SafeAreaView>}
+function Catalogue({ navigation }: any) {
+  const [q, setQ] = useState(""),
+    [cat, setCat] = useState("Tout");
+  const cats = ["Tout", "Sacs", "Mode", "Montres", "Chaussures"],
+    data = P.filter(
+      (p) =>
+        (cat === "Tout" || p.category === cat) &&
+        `${p.brand} ${p.title}`.toLowerCase().includes(q.toLowerCase()),
+    );
+  return (
+    <SafeAreaView style={s.safe}>
+      <Header navigation={navigation} title="CATALOGUE" />
+      <View style={s.search}>
+        <Feather name="search" size={18} color={C.muted} />
+        <TextInput
+          placeholder="Marque, pièce, catégorie…"
+          value={q}
+          onChangeText={setQ}
+          style={s.searchInput}
+        />
+        <Feather name="sliders" size={18} />
+      </View>
+      <View style={s.filterRail}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={s.chips}
+        >
+          {cats.map((c) => (
+            <Pressable
+              key={c}
+              onPress={() => setCat(c)}
+              style={[s.chip, cat === c && s.chipOn]}
+            >
+              <Text style={[s.chipText, cat === c && { color: C.white }]}>
+                {c}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      </View>
+      <FlatList
+        style={s.catalogList}
+        data={data}
+        numColumns={2}
+        columnWrapperStyle={s.catalogColumns}
+        contentContainerStyle={s.grid}
+        renderItem={({ item }) => (
+          <Card item={item} navigation={navigation} wide />
+        )}
+        ListHeaderComponent={
+          <View style={s.resultHead}>
+            <Text style={s.result}>{data.length} pièces</Text>
+            <Text style={s.sort}>Trier : nouveautés⌄</Text>
+          </View>
+        }
+      />
+    </SafeAreaView>
+  );
+}
+function Empty({ icon, title, text, action, onPress }: any) {
+  return (
+    <View style={s.empty}>
+      <Ionicons name={icon} size={38} color={C.gold} />
+      <Text style={s.emptyTitle}>{title}</Text>
+      <Text style={s.center}>{text}</Text>
+      <Pressable style={s.outline} onPress={onPress}>
+        <Text style={s.outlineText}>{action}</Text>
+      </Pressable>
+    </View>
+  );
+}
+function Favorites({ navigation }: any) {
+  const { favorites } = useShop(),
+    data = P.filter((x) => favorites.has(x.id));
+  return (
+    <SafeAreaView style={s.safe}>
+      <Header navigation={navigation} title="FAVORIS" />
+      {data.length ? (
+        <FlatList
+          data={data}
+          numColumns={2}
+          columnWrapperStyle={{ gap: 12 }}
+          contentContainerStyle={s.grid}
+          renderItem={({ item }) => (
+            <Card item={item} navigation={navigation} wide />
+          )}
+        />
+      ) : (
+        <Empty
+          icon="heart-outline"
+          title="Votre sélection personnelle"
+          text="Enregistrez les pièces qui vous inspirent pour les retrouver ici."
+          action="EXPLORER LE CATALOGUE"
+          onPress={() => navigation.navigate("Catalogue")}
+        />
+      )}
+    </SafeAreaView>
+  );
+}
+function Auctions({ navigation }: any) {
+  return (
+    <SafeAreaView style={s.safe}>
+      <Header navigation={navigation} title="ENCHÈRES" />
+      <FlatList
+        data={P.filter((x) => x.auction)}
+        contentContainerStyle={{ padding: 20, gap: 16 }}
+        ListHeaderComponent={
+          <View>
+            <Text style={s.pageTitle}>Suivez chaque instant.</Text>
+            <Text style={s.body}>
+              Vos enchères actives et les ventes qui se terminent bientôt.
+            </Text>
+          </View>
+        }
+        renderItem={({ item }) => (
+          <Pressable
+            style={s.bidCard}
+            onPress={() => navigation.navigate("Product", { id: item.id })}
+          >
+            <Image source={{ uri: item.image }} style={s.bidImg} />
+            <View style={{ flex: 1 }}>
+              <Text style={s.brand}>{item.brand}</Text>
+              <Text style={s.bidTitle}>{item.title}</Text>
+              <Text style={s.price}>{money(item.bid || item.price)}</Text>
+              <Text style={s.bidTime}>● Se termine dans {item.ends}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={C.muted} />
+          </Pressable>
+        )}
+      />
+    </SafeAreaView>
+  );
+}
+function Account({ navigation }: any) {
+  return (
+    <SafeAreaView style={s.safe}>
+      <Header navigation={navigation} title="MON COMPTE" />
+      <ScrollView contentContainerStyle={{ padding: 20 }}>
+        <View style={s.profile}>
+          <View style={s.avatar}>
+            <Text style={s.avatarText}>MB</Text>
+          </View>
+          <Text style={s.profileTitle}>Bienvenue</Text>
+          <Text style={s.center}>
+            Connectez-vous pour suivre vos commandes, enchères et favoris sur
+            tous vos appareils.
+          </Text>
+          <Pressable
+            style={s.blackBtn}
+            onPress={() => navigation.navigate("Login")}
+          >
+            <Text style={s.btnText}>SE CONNECTER</Text>
+          </Pressable>
+        </View>
+        {[
+          ["package", "Mes commandes"],
+          ["hammer", "Mes enchères"],
+          ["location", "Mes adresses"],
+          ["card", "Moyens de paiement"],
+          ["notifications", "Notifications"],
+          ["help-circle", "Aide & conciergerie"],
+        ].map(([i, t]) => (
+          <Pressable key={t} style={s.menu}>
+            <Ionicons name={`${i}-outline` as any} size={20} />
+            <Text style={s.menuText}>{t}</Text>
+            <Ionicons name="chevron-forward" size={17} color={C.muted} />
+          </Pressable>
+        ))}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
 
-function Product({route,navigation}:any){const p=P.find(x=>x.id===route.params.id)!,{favorites,toggle,add}=useShop();return <SafeAreaView style={s.safe}><ScrollView><View><Image source={{uri:p.image}} style={s.detailImg}/><Pressable style={s.back} onPress={()=>navigation.goBack()}><Ionicons name="arrow-back" size={22}/></Pressable><Pressable style={s.detailHeart} onPress={()=>toggle(p.id)}><Ionicons name={favorites.has(p.id)?'heart':'heart-outline'} size={22} color={favorites.has(p.id)?C.red:C.ink}/></Pressable></View><View style={s.detailBody}><View style={s.between}><Text style={s.brand}>{p.brand}</Text><Text style={s.certified}>✓ CERTIFIÉE</Text></View><Text style={s.detailTitle}>{p.title}</Text><Text style={s.priceBig}>{money(p.bid||p.price)}</Text>{p.auction&&<View style={s.bidBox}><Text style={s.bidLabel}>ENCHÈRE ACTUELLE</Text><Text style={s.bidCount}>Fin dans {p.ends}</Text></View>}<View style={s.info}><Text style={s.infoLabel}>État</Text><Text style={s.infoValue}>{p.condition}</Text></View><View style={s.info}><Text style={s.infoLabel}>Authentification</Text><Text style={s.infoValue}>Contrôlée par nos experts</Text></View><Text style={s.description}>Une pièce d’exception sélectionnée pour sa qualité et son caractère intemporel. Livrée avec son certificat d’authenticité.</Text><View style={s.promise}><Trust icon="shield-checkmark-outline" title="Authenticité garantie"/><Trust icon="cube-outline" title="Livraison suivie"/></View></View></ScrollView><View style={s.bottom}><View><Text style={s.actionLabel}>{p.auction?'Prochaine mise':'Prix'}</Text><Text style={s.actionPrice}>{money(p.auction?(p.bid||p.price)+50:p.price)}</Text></View><Pressable style={s.blackFlex} onPress={()=>{Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);p.auction?Alert.alert('Enchère préparée','Connectez-vous pour la confirmer.'):(add(p),Alert.alert('Ajouté au panier',p.title))}}><Text style={s.btnText}>{p.auction?'ENCHÉRIR':'AJOUTER AU PANIER'}</Text></Pressable></View></SafeAreaView>}
-function Search({navigation}:any){const[q,setQ]=useState(''),data=q?P.filter(x=>`${x.brand} ${x.title}`.toLowerCase().includes(q.toLowerCase())):[];return <SafeAreaView style={s.safe}><View style={s.searchPage}><Pressable onPress={()=>navigation.goBack()}><Ionicons name="arrow-back" size={23}/></Pressable><TextInput autoFocus placeholder="Que recherchez-vous ?" value={q} onChangeText={setQ} style={s.searchPageInput}/></View><FlatList data={data} contentContainerStyle={{padding:20,gap:12}} renderItem={({item})=><Pressable style={s.searchResult} onPress={()=>navigation.replace('Product',{id:item.id})}><Image source={{uri:item.image}} style={s.thumb}/><View><Text style={s.brand}>{item.brand}</Text><Text style={s.productTitle}>{item.title}</Text><Text style={s.price}>{money(item.bid||item.price)}</Text></View></Pressable>}/></SafeAreaView>}
-function Cart({navigation}:any){const{cart}=useShop(),total=cart.reduce((a,b)=>a+b.price,0);return <SafeAreaView style={s.safe}><View style={s.modalHead}><Pressable onPress={()=>navigation.goBack()}><Ionicons name="close" size={25}/></Pressable><Text style={s.wordmark}>MON PANIER</Text><View style={{width:25}}/></View>{cart.length?<><FlatList data={cart} contentContainerStyle={{padding:20,gap:14}} renderItem={({item})=><View style={s.searchResult}><Image source={{uri:item.image}} style={s.cartImg}/><View><Text style={s.brand}>{item.brand}</Text><Text style={s.productTitle}>{item.title}</Text><Text style={s.price}>{money(item.price)}</Text></View></View>}/><View style={s.checkout}><View style={s.between}><Text>Total</Text><Text style={s.priceBig}>{money(total)}</Text></View><Pressable style={s.blackBtn} onPress={()=>Alert.alert('Paiement sécurisé','À connecter au compte marchand avant publication.')}><Text style={s.btnText}>PASSER AU PAIEMENT</Text></Pressable></View></>:<Empty icon="bag-outline" title="Votre panier est vide" text="Découvrez notre sélection de pièces authentifiées." action="DÉCOUVRIR" onPress={()=>navigation.goBack()}/>}</SafeAreaView>}
-function Login({navigation}:any){return <SafeAreaView style={s.login}><Pressable style={s.loginClose} onPress={()=>navigation.goBack()}><Ionicons name="close" size={25} color={C.white}/></Pressable><Text style={s.logo}>MB</Text><Text style={s.loginTitle}>Votre vestiaire,{`\n`}partout avec vous.</Text><TextInput placeholder="Adresse e-mail" placeholderTextColor="#aaa" style={s.loginInput}/><Pressable style={s.goldWide} onPress={()=>Alert.alert('Connexion','À relier à l’API de production.')}><Text style={s.btnText}>CONTINUER</Text></Pressable><Text style={s.loginLegal}>En continuant, vous acceptez nos conditions d’utilisation et notre politique de confidentialité.</Text></SafeAreaView>}
-function LuxuryTabBar({state,navigation}:any){const icons:any={Accueil:'home',Catalogue:'search',Favoris:'heart',Enchères:'hourglass',Compte:'person'};return <View style={s.luxuryBar}>{state.routes.map((route:any,index:number)=>{const active=state.index===index;return <Pressable key={route.key} style={[s.luxuryItem,active&&s.luxuryItemOn]} onPress={()=>navigation.navigate(route.name)}><View style={[s.navIcon,active&&s.navIconOn]}><Ionicons name={`${icons[route.name]}${active?'':'-outline'}` as any} size={active?21:20} color={active?C.ink:C.muted}/></View><Text style={[s.navLabel,active&&s.navLabelOn]}>{route.name==='Catalogue'?'Découvrir':route.name}</Text>{active&&<View style={s.activeLine}/>}</Pressable>})}</View>}
-function TabNav(){return <Tabs.Navigator tabBar={props=><LuxuryTabBar {...props}/>} screenOptions={{headerShown:false}}><Tabs.Screen name="Accueil" component={Home}/><Tabs.Screen name="Catalogue" component={Catalogue}/><Tabs.Screen name="Favoris" component={Favorites}/><Tabs.Screen name="Enchères" component={Auctions}/><Tabs.Screen name="Compte" component={Account}/></Tabs.Navigator>}
-function MobileExperience({value}:any){return <SafeAreaProvider style={{flex:1}}><Shop.Provider value={value}><NavigationContainer theme={{...DefaultTheme,colors:{...DefaultTheme.colors,background:C.cream}}}><Stack.Navigator screenOptions={{headerShown:false,animation:'slide_from_right'}}><Stack.Screen name="Tabs" component={TabNav}/><Stack.Screen name="Product" component={Product}/><Stack.Screen name="Search" component={Search}/><Stack.Screen name="Cart" component={Cart} options={{presentation:'modal',animation:'slide_from_bottom'}}/><Stack.Screen name="Login" component={Login} options={{presentation:'fullScreenModal',animation:'fade_from_bottom'}}/></Stack.Navigator></NavigationContainer></Shop.Provider></SafeAreaProvider>}
-function WebStatusBar(){return <View style={s.webStatus}><Text style={s.webTime}>9:41</Text><View style={s.webSignals}><Ionicons name="cellular" size={13} color={C.ink}/><Ionicons name="wifi" size={13} color={C.ink}/><Ionicons name="battery-full" size={15} color={C.ink}/></View></View>}
-export default function App(){const{width,height}=useWindowDimensions(),[favorites,setFav]=useState(new Set<string>()),[cart,setCart]=useState<Product[]>([]);const value=useMemo(()=>({favorites,toggle:(id:string)=>setFav(x=>{const n=new Set(x);n.has(id)?n.delete(id):n.add(id);return n}),cart,add:(p:Product)=>setCart(x=>x.some(i=>i.id===p.id)?x:[...x,p])}),[favorites,cart]);const framed=Platform.OS==='web'&&width>620;if(!framed)return <MobileExperience value={value}/>;return <View style={s.webStage}><View style={[s.phoneFrame,{height:Math.min(height-40,900)}]}><WebStatusBar/><View style={s.phoneScreen}><MobileExperience value={value}/></View><View style={s.homeIndicator}/></View></View>}
+function Product({ route, navigation }: any) {
+  const p = P.find((x) => x.id === route.params.id)!,
+    { favorites, toggle, add } = useShop();
+  return (
+    <SafeAreaView style={s.safe}>
+      <ScrollView>
+        <View>
+          <Image source={{ uri: p.image }} style={s.detailImg} />
+          <Pressable style={s.back} onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={22} />
+          </Pressable>
+          <Pressable style={s.detailHeart} onPress={() => toggle(p.id)}>
+            <Ionicons
+              name={favorites.has(p.id) ? "heart" : "heart-outline"}
+              size={22}
+              color={favorites.has(p.id) ? C.red : C.ink}
+            />
+          </Pressable>
+        </View>
+        <View style={s.detailBody}>
+          <View style={s.between}>
+            <Text style={s.brand}>{p.brand}</Text>
+            <Text style={s.certified}>✓ CERTIFIÉE</Text>
+          </View>
+          <Text style={s.detailTitle}>{p.title}</Text>
+          <Text style={s.priceBig}>{money(p.bid || p.price)}</Text>
+          {p.auction && (
+            <View style={s.bidBox}>
+              <Text style={s.bidLabel}>ENCHÈRE ACTUELLE</Text>
+              <Text style={s.bidCount}>Fin dans {p.ends}</Text>
+            </View>
+          )}
+          <View style={s.info}>
+            <Text style={s.infoLabel}>État</Text>
+            <Text style={s.infoValue}>{p.condition}</Text>
+          </View>
+          <View style={s.info}>
+            <Text style={s.infoLabel}>Authentification</Text>
+            <Text style={s.infoValue}>Contrôlée par nos experts</Text>
+          </View>
+          <Text style={s.description}>
+            Une pièce d’exception sélectionnée pour sa qualité et son caractère
+            intemporel. Livrée avec son certificat d’authenticité.
+          </Text>
+          <View style={s.promise}>
+            <Trust
+              icon="shield-checkmark-outline"
+              title="Authenticité garantie"
+            />
+            <Trust icon="cube-outline" title="Livraison suivie" />
+          </View>
+        </View>
+      </ScrollView>
+      <View style={s.bottom}>
+        <View>
+          <Text style={s.actionLabel}>
+            {p.auction ? "Prochaine mise" : "Prix"}
+          </Text>
+          <Text style={s.actionPrice}>
+            {money(p.auction ? (p.bid || p.price) + 50 : p.price)}
+          </Text>
+        </View>
+        <Pressable
+          style={s.blackFlex}
+          onPress={() => {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            p.auction
+              ? Alert.alert(
+                  "Enchère préparée",
+                  "Connectez-vous pour la confirmer.",
+                )
+              : (add(p), Alert.alert("Ajouté au panier", p.title));
+          }}
+        >
+          <Text style={s.btnText}>
+            {p.auction ? "ENCHÉRIR" : "AJOUTER AU PANIER"}
+          </Text>
+        </Pressable>
+      </View>
+    </SafeAreaView>
+  );
+}
+function Search({ navigation }: any) {
+  const [q, setQ] = useState(""),
+    data = q
+      ? P.filter((x) =>
+          `${x.brand} ${x.title}`.toLowerCase().includes(q.toLowerCase()),
+        )
+      : [];
+  return (
+    <SafeAreaView style={s.safe}>
+      <View style={s.searchPage}>
+        <Pressable onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={23} />
+        </Pressable>
+        <TextInput
+          autoFocus
+          placeholder="Que recherchez-vous ?"
+          value={q}
+          onChangeText={setQ}
+          style={s.searchPageInput}
+        />
+      </View>
+      <FlatList
+        data={data}
+        contentContainerStyle={{ padding: 20, gap: 12 }}
+        renderItem={({ item }) => (
+          <Pressable
+            style={s.searchResult}
+            onPress={() => navigation.replace("Product", { id: item.id })}
+          >
+            <Image source={{ uri: item.image }} style={s.thumb} />
+            <View>
+              <Text style={s.brand}>{item.brand}</Text>
+              <Text style={s.productTitle}>{item.title}</Text>
+              <Text style={s.price}>{money(item.bid || item.price)}</Text>
+            </View>
+          </Pressable>
+        )}
+      />
+    </SafeAreaView>
+  );
+}
+function Cart({ navigation }: any) {
+  const { cart } = useShop(),
+    total = cart.reduce((a, b) => a + b.price, 0);
+  return (
+    <SafeAreaView style={s.safe}>
+      <View style={s.modalHead}>
+        <Pressable onPress={() => navigation.goBack()}>
+          <Ionicons name="close" size={25} />
+        </Pressable>
+        <Text style={s.wordmark}>MON PANIER</Text>
+        <View style={{ width: 25 }} />
+      </View>
+      {cart.length ? (
+        <>
+          <FlatList
+            data={cart}
+            contentContainerStyle={{ padding: 20, gap: 14 }}
+            renderItem={({ item }) => (
+              <View style={s.searchResult}>
+                <Image source={{ uri: item.image }} style={s.cartImg} />
+                <View>
+                  <Text style={s.brand}>{item.brand}</Text>
+                  <Text style={s.productTitle}>{item.title}</Text>
+                  <Text style={s.price}>{money(item.price)}</Text>
+                </View>
+              </View>
+            )}
+          />
+          <View style={s.checkout}>
+            <View style={s.between}>
+              <Text>Total</Text>
+              <Text style={s.priceBig}>{money(total)}</Text>
+            </View>
+            <Pressable
+              style={s.blackBtn}
+              onPress={() =>
+                Alert.alert(
+                  "Paiement sécurisé",
+                  "À connecter au compte marchand avant publication.",
+                )
+              }
+            >
+              <Text style={s.btnText}>PASSER AU PAIEMENT</Text>
+            </Pressable>
+          </View>
+        </>
+      ) : (
+        <Empty
+          icon="bag-outline"
+          title="Votre panier est vide"
+          text="Découvrez notre sélection de pièces authentifiées."
+          action="DÉCOUVRIR"
+          onPress={() => navigation.goBack()}
+        />
+      )}
+    </SafeAreaView>
+  );
+}
+function Login({ navigation }: any) {
+  return (
+    <SafeAreaView style={s.login}>
+      <Pressable style={s.loginClose} onPress={() => navigation.goBack()}>
+        <Ionicons name="close" size={25} color={C.white} />
+      </Pressable>
+      <Text style={s.logo}>MB</Text>
+      <Text style={s.loginTitle}>Votre vestiaire,{`\n`}partout avec vous.</Text>
+      <TextInput
+        placeholder="Adresse e-mail"
+        placeholderTextColor="#aaa"
+        style={s.loginInput}
+      />
+      <Pressable
+        style={s.goldWide}
+        onPress={() =>
+          Alert.alert("Connexion", "À relier à l’API de production.")
+        }
+      >
+        <Text style={s.btnText}>CONTINUER</Text>
+      </Pressable>
+      <Text style={s.loginLegal}>
+        En continuant, vous acceptez nos conditions d’utilisation et notre
+        politique de confidentialité.
+      </Text>
+    </SafeAreaView>
+  );
+}
+function LuxuryTabBar({ state, navigation }: any) {
+  const icons: any = {
+    Accueil: "home",
+    Catalogue: "search",
+    Favoris: "heart",
+    Enchères: "hourglass",
+    Compte: "person",
+  };
+  return (
+    <View style={s.luxuryBar}>
+      {state.routes.map((route: any, index: number) => {
+        const active = state.index === index;
+        return (
+          <Pressable
+            key={route.key}
+            style={[s.luxuryItem, active && s.luxuryItemOn]}
+            onPress={() => navigation.navigate(route.name)}
+          >
+            <View style={[s.navIcon, active && s.navIconOn]}>
+              <Ionicons
+                name={`${icons[route.name]}${active ? "" : "-outline"}` as any}
+                size={active ? 21 : 20}
+                color={active ? C.ink : C.muted}
+              />
+            </View>
+            <Text style={[s.navLabel, active && s.navLabelOn]}>
+              {route.name === "Catalogue" ? "Découvrir" : route.name}
+            </Text>
+            {active && <View style={s.activeLine} />}
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+function TabNav() {
+  return (
+    <Tabs.Navigator
+      tabBar={(props) => <LuxuryTabBar {...props} />}
+      screenOptions={{ headerShown: false }}
+    >
+      <Tabs.Screen name="Accueil" component={Home} />
+      <Tabs.Screen name="Catalogue" component={Catalogue} />
+      <Tabs.Screen name="Favoris" component={Favorites} />
+      <Tabs.Screen name="Enchères" component={Auctions} />
+      <Tabs.Screen name="Compte" component={Account} />
+    </Tabs.Navigator>
+  );
+}
+function MobileExperience({ value }: any) {
+  return (
+    <SafeAreaProvider style={{ flex: 1 }}>
+      <Shop.Provider value={value}>
+        <NavigationContainer
+          theme={{
+            ...DefaultTheme,
+            colors: { ...DefaultTheme.colors, background: C.cream },
+          }}
+        >
+          <Stack.Navigator
+            screenOptions={{
+              headerShown: false,
+              animation: "slide_from_right",
+            }}
+          >
+            <Stack.Screen name="Tabs" component={TabNav} />
+            <Stack.Screen name="Product" component={Product} />
+            <Stack.Screen name="Search" component={Search} />
+            <Stack.Screen
+              name="Cart"
+              component={Cart}
+              options={{
+                presentation: "modal",
+                animation: "slide_from_bottom",
+              }}
+            />
+            <Stack.Screen
+              name="Login"
+              component={Login}
+              options={{
+                presentation: "fullScreenModal",
+                animation: "fade_from_bottom",
+              }}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </Shop.Provider>
+    </SafeAreaProvider>
+  );
+}
+function WebStatusBar() {
+  return (
+    <View style={s.webStatus}>
+      <Text style={s.webTime}>9:41</Text>
+      <View style={s.webSignals}>
+        <Ionicons name="cellular" size={13} color={C.ink} />
+        <Ionicons name="wifi" size={13} color={C.ink} />
+        <Ionicons name="battery-full" size={15} color={C.ink} />
+      </View>
+    </View>
+  );
+}
+export default function App() {
+  const { width, height } = useWindowDimensions(),
+    [favorites, setFav] = useState(new Set<string>()),
+    [cart, setCart] = useState<Product[]>([]);
+  const value = useMemo(
+    () => ({
+      favorites,
+      toggle: (id: string) =>
+        setFav((x) => {
+          const n = new Set(x);
+          n.has(id) ? n.delete(id) : n.add(id);
+          return n;
+        }),
+      cart,
+      add: (p: Product) =>
+        setCart((x) => (x.some((i) => i.id === p.id) ? x : [...x, p])),
+    }),
+    [favorites, cart],
+  );
+  const framed = Platform.OS === "web" && width > 620;
+  if (!framed) return <MobileExperience value={value} />;
+  return (
+    <View style={s.webStage}>
+      <View style={[s.phoneFrame, { height: Math.min(height - 40, 900) }]}>
+        <WebStatusBar />
+        <View style={s.phoneScreen}>
+          <MobileExperience value={value} />
+        </View>
+        <View style={s.homeIndicator} />
+      </View>
+    </View>
+  );
+}
 
-const s=StyleSheet.create({safe:{flex:1,width:'100%',maxWidth:'100%',overflow:'hidden',backgroundColor:C.cream},header:{height:56,paddingHorizontal:20,backgroundColor:C.paper,flexDirection:'row',alignItems:'center',justifyContent:'space-between',borderBottomWidth:1,borderColor:C.line},wordmark:{fontFamily:'serif',fontSize:16,letterSpacing:2.4},badge:{position:'absolute',right:-7,top:-7,minWidth:16,height:16,borderRadius:8,backgroundColor:C.gold,alignItems:'center',justifyContent:'center'},badgeText:{color:C.white,fontSize:10,fontWeight:'700'},hero:{height:560,justifyContent:'flex-end',backgroundColor:C.ink},heroShade:{height:'100%',justifyContent:'flex-end',padding:24,paddingBottom:32},heroTag:{alignSelf:'flex-start',borderWidth:1,borderColor:'rgba(255,255,255,.45)',paddingHorizontal:10,paddingVertical:6,marginBottom:12},heroTagText:{fontSize:9,color:C.white,letterSpacing:1.7,fontWeight:'700'},kickerLight:{fontSize:10,letterSpacing:2.5,color:'#e2c38f',fontWeight:'700',marginBottom:10},heroTitle:{fontFamily:'serif',fontSize:40,lineHeight:46,color:C.white,marginBottom:10},heroSub:{fontSize:13,lineHeight:20,color:'rgba(255,255,255,.78)',maxWidth:310,marginBottom:22},heroActions:{flexDirection:'row',gap:10},goldBtn:{backgroundColor:C.gold,paddingHorizontal:24,paddingVertical:15},ghostBtn:{borderWidth:1,borderColor:'rgba(255,255,255,.65)',paddingHorizontal:24,paddingVertical:15},ghostText:{color:C.white,fontSize:11,fontWeight:'800',letterSpacing:1.2},btnText:{color:C.white,fontSize:11,fontWeight:'800',letterSpacing:1.2},storyWrap:{backgroundColor:C.paper,paddingTop:24,paddingBottom:19},storyHeading:{fontFamily:'serif',fontSize:23,marginLeft:20},storyRow:{paddingHorizontal:18,gap:15,marginTop:16},story:{width:72,alignItems:'center'},storyRing:{width:67,height:67,borderRadius:34,padding:2.5},storyImg:{width:'100%',height:'100%',borderRadius:32,borderWidth:2,borderColor:C.paper},storyLabel:{fontSize:10,lineHeight:13,textAlign:'center',color:C.ink,marginTop:7},exclusive:{backgroundColor:C.ink,padding:28,alignItems:'center'},lockCircle:{width:42,height:42,borderRadius:21,borderWidth:1,borderColor:'rgba(189,149,90,.5)',alignItems:'center',justifyContent:'center',marginBottom:14},kicker:{fontSize:10,letterSpacing:2.2,color:C.gold,fontWeight:'800',marginBottom:8},between:{flexDirection:'row',alignItems:'center',justifyContent:'space-between'},sectionTitle:{fontFamily:'serif',fontSize:23},timer:{color:C.gold,fontWeight:'700'},body:{fontSize:14,lineHeight:21,color:C.muted,marginTop:10},countdown:{flexDirection:'row',alignItems:'flex-start',marginTop:24,marginBottom:22},countUnit:{alignItems:'center',minWidth:56},countNumber:{fontFamily:'serif',fontSize:35,color:C.gold,fontVariant:['tabular-nums']},countLabel:{fontSize:7,letterSpacing:1.2,color:'#777',marginTop:3},countSep:{fontFamily:'serif',fontSize:31,color:'rgba(189,149,90,.4)',marginHorizontal:3},exclusiveBtn:{borderWidth:1,borderColor:C.gold,paddingHorizontal:22,paddingVertical:13},exclusiveBtnText:{fontSize:10,letterSpacing:1.4,color:C.gold,fontWeight:'800'},section:{paddingTop:30,paddingLeft:20,paddingBottom:30,borderBottomWidth:1,borderColor:C.line},link:{fontSize:12,color:C.muted,marginRight:20},seeAll:{marginRight:20,flexDirection:'row',alignItems:'center',gap:6,backgroundColor:'#eee4d6',borderRadius:18,paddingHorizontal:13,paddingVertical:8},seeAllText:{fontSize:10,color:C.ink,fontWeight:'800',letterSpacing:.5},marquee:{backgroundColor:C.gold,paddingVertical:11,overflow:'hidden'},marqueeText:{fontSize:9,letterSpacing:1.7,color:C.white,fontWeight:'800',textAlign:'center'},card:{width:168,marginTop:16,backgroundColor:C.paper,borderRadius:18,paddingBottom:14,overflow:'hidden',borderWidth:1,borderColor:'#ece3d6',shadowColor:'#382d1f',shadowOpacity:.1,shadowRadius:12,shadowOffset:{width:0,height:5},elevation:3},wide:{flex:1,width:'auto',minWidth:0},cardImg:{width:168,height:224,backgroundColor:C.line,borderTopLeftRadius:17,borderTopRightRadius:17},wideImg:{width:'100%',height:224},heart:{position:'absolute',right:9,top:9,width:34,height:34,borderRadius:17,backgroundColor:'rgba(255,253,249,.92)',alignItems:'center',justifyContent:'center'},pill:{position:'absolute',left:8,bottom:8,backgroundColor:'rgba(17,14,11,.84)',borderRadius:12,padding:6,flexDirection:'row',alignItems:'center',gap:5},dot:{width:6,height:6,borderRadius:3,backgroundColor:C.red},pillText:{color:C.white,fontSize:10,fontWeight:'700'},brand:{fontSize:9,letterSpacing:1.4,color:C.gold,fontWeight:'800',marginTop:11,marginHorizontal:12},productTitle:{fontFamily:'serif',fontSize:15,marginTop:4,marginHorizontal:12},price:{fontSize:13,fontWeight:'700',marginTop:7,marginHorizontal:12},moreCard:{width:150,height:306,marginTop:16,borderRadius:18,borderWidth:1.5,borderColor:C.gold,backgroundColor:'#f0e7d9',alignItems:'center',justifyContent:'center',padding:18},moreIcon:{width:48,height:48,borderRadius:24,backgroundColor:C.paper,alignItems:'center',justifyContent:'center',marginBottom:18},moreTitle:{fontFamily:'serif',fontSize:19,lineHeight:24,textAlign:'center',color:C.ink},moreCount:{fontSize:9,letterSpacing:1.2,color:C.gold,fontWeight:'800',marginTop:10},softBanner:{marginHorizontal:18,marginVertical:10,borderRadius:18,backgroundColor:'#e9dece',padding:18,flexDirection:'row',alignItems:'center',gap:13},softTitle:{fontFamily:'serif',fontSize:19,color:C.ink},softText:{fontSize:11,color:C.muted,marginTop:3},editorial:{backgroundColor:'#28231d',padding:24},editorialTitle:{fontFamily:'serif',fontSize:29,lineHeight:35,color:C.white,maxWidth:300},editorialText:{fontSize:13,lineHeight:20,color:'#aaa',marginTop:10,marginBottom:20},editorialGrid:{flexDirection:'row',gap:10},editorialCard:{flex:1},editorialImg:{width:'100%',height:170},editorialCardTitle:{fontFamily:'serif',fontSize:15,lineHeight:19,color:C.white,marginTop:9},trustBlock:{backgroundColor:C.ink,padding:22,gap:14},trust:{flexDirection:'row',alignItems:'center',gap:10},trustText:{fontSize:12,fontWeight:'600'},search:{margin:16,marginBottom:8,height:48,borderWidth:1,borderColor:C.line,backgroundColor:C.paper,flexDirection:'row',alignItems:'center',paddingHorizontal:14,gap:10},searchInput:{flex:1,fontSize:14},filterRail:{height:56,width:'100%'},chips:{paddingHorizontal:16,gap:8,height:56,alignItems:'center'},chip:{height:34,paddingHorizontal:15,borderRadius:17,borderWidth:1,borderColor:C.line,justifyContent:'center'},chipOn:{backgroundColor:C.ink},chipText:{fontSize:12,color:C.muted},catalogList:{width:'100%',maxWidth:'100%'},catalogColumns:{gap:12,justifyContent:'space-between',width:'100%'},grid:{paddingHorizontal:16,paddingBottom:24,width:'100%'},resultHead:{width:'100%',flexDirection:'row',alignItems:'center',justifyContent:'space-between',paddingVertical:14},result:{fontFamily:'serif',fontSize:18},sort:{fontSize:11,color:C.muted},empty:{flex:1,alignItems:'center',justifyContent:'center',padding:40},emptyTitle:{fontFamily:'serif',fontSize:25,textAlign:'center',marginTop:18,marginBottom:9},center:{fontSize:14,lineHeight:21,color:C.muted,textAlign:'center'},outline:{borderWidth:1,borderColor:C.ink,padding:14,marginTop:24},outlineText:{fontSize:11,fontWeight:'800',letterSpacing:1},bidCard:{backgroundColor:C.paper,padding:12,flexDirection:'row',alignItems:'center',gap:14},bidImg:{width:88,height:110},bidTitle:{fontFamily:'serif',fontSize:16,marginTop:4},bidTime:{fontSize:11,color:C.red,marginTop:8},pageTitle:{fontFamily:'serif',fontSize:29},profile:{alignItems:'center',paddingVertical:20,paddingBottom:30},avatar:{width:70,height:70,borderRadius:35,borderWidth:1,borderColor:C.gold,alignItems:'center',justifyContent:'center'},avatarText:{fontFamily:'serif',fontSize:22,color:C.gold},profileTitle:{fontFamily:'serif',fontSize:28,marginTop:16},blackBtn:{width:'100%',height:50,backgroundColor:C.ink,alignItems:'center',justifyContent:'center',marginTop:22},menu:{height:58,borderTopWidth:1,borderColor:C.line,flexDirection:'row',alignItems:'center',gap:13},menuText:{flex:1,fontSize:14},detailImg:{width:'100%',height:470},back:{position:'absolute',top:16,left:16,width:42,height:42,borderRadius:21,backgroundColor:C.white,alignItems:'center',justifyContent:'center'},detailHeart:{position:'absolute',top:16,right:16,width:42,height:42,borderRadius:21,backgroundColor:C.white,alignItems:'center',justifyContent:'center'},detailBody:{padding:22},certified:{fontSize:10,color:C.gold,fontWeight:'800'},detailTitle:{fontFamily:'serif',fontSize:28,marginTop:8},priceBig:{fontFamily:'serif',fontSize:24,marginTop:14},bidBox:{backgroundColor:'#eee3d2',padding:14,marginTop:16,flexDirection:'row',justifyContent:'space-between'},bidLabel:{fontSize:10,fontWeight:'800'},bidCount:{fontSize:11,color:C.red,fontWeight:'700'},info:{flexDirection:'row',justifyContent:'space-between',paddingVertical:16,borderBottomWidth:1,borderColor:C.line},infoLabel:{fontSize:12,color:C.muted},infoValue:{fontSize:12,fontWeight:'600'},description:{fontSize:14,lineHeight:22,color:C.muted,marginVertical:20},promise:{backgroundColor:C.paper,padding:16,gap:12},bottom:{backgroundColor:C.paper,padding:12,paddingHorizontal:20,flexDirection:'row',alignItems:'center',gap:18},actionLabel:{fontSize:9,color:C.muted},actionPrice:{fontSize:17,fontWeight:'800'},blackFlex:{flex:1,height:50,backgroundColor:C.ink,alignItems:'center',justifyContent:'center'},searchPage:{height:64,paddingHorizontal:20,flexDirection:'row',alignItems:'center',gap:15},searchPageInput:{flex:1,fontFamily:'serif',fontSize:21},searchResult:{flexDirection:'row',gap:14,alignItems:'center',backgroundColor:C.paper,padding:10},thumb:{width:72,height:88},modalHead:{height:58,paddingHorizontal:20,flexDirection:'row',alignItems:'center',justifyContent:'space-between'},cartImg:{width:82,height:102},checkout:{padding:20,backgroundColor:C.paper},login:{flex:1,backgroundColor:C.ink,padding:28,justifyContent:'center'},loginClose:{position:'absolute',right:24,top:60},logo:{fontFamily:'serif',fontSize:40,color:C.gold,textAlign:'center',marginBottom:36},loginTitle:{fontFamily:'serif',fontSize:35,lineHeight:43,color:C.white,textAlign:'center',marginBottom:38},loginInput:{height:54,borderBottomWidth:1,borderColor:'#665b4e',color:C.white},goldWide:{height:52,backgroundColor:C.gold,alignItems:'center',justifyContent:'center',marginTop:22},loginLegal:{fontSize:10,color:'#888',textAlign:'center',marginTop:22},luxuryBar:{height:78,backgroundColor:C.paper,borderTopWidth:1,borderColor:C.line,flexDirection:'row',paddingHorizontal:8,paddingTop:6,paddingBottom:8},luxuryItem:{flex:1,alignItems:'center',justifyContent:'center',position:'relative'},luxuryItemOn:{backgroundColor:'#f1e9dc',borderRadius:18},navIcon:{height:26,alignItems:'center',justifyContent:'center'},navIconOn:{transform:[{translateY:-1}]},navLabel:{fontSize:8.5,color:C.muted,marginTop:2,fontWeight:'600'},navLabelOn:{color:C.ink,fontWeight:'800'},activeLine:{position:'absolute',top:0,width:18,height:2,borderRadius:1,backgroundColor:C.gold},webStage:{flex:1,minHeight:'100%',backgroundColor:'#d8cdbc',alignItems:'center',justifyContent:'center',padding:20},phoneFrame:{width:430,maxWidth:'100%',backgroundColor:C.ink,borderRadius:42,borderWidth:8,borderColor:'#17140f',overflow:'hidden',shadowColor:'#17100a',shadowOpacity:.34,shadowRadius:35,shadowOffset:{width:0,height:18},elevation:18},webStatus:{height:28,backgroundColor:C.paper,paddingHorizontal:22,flexDirection:'row',alignItems:'center',justifyContent:'space-between'},webTime:{fontSize:10,fontWeight:'800',color:C.ink},webSignals:{flexDirection:'row',alignItems:'center',gap:5},phoneScreen:{flex:1,width:'100%',overflow:'hidden',backgroundColor:C.cream},homeIndicator:{position:'absolute',bottom:5,left:'50%',marginLeft:-53,width:106,height:4,borderRadius:2,backgroundColor:'rgba(23,20,15,.78)'}});
-
-const s=StyleSheet.create({safe:{flex:1,width:'100%',maxWidth:'100%',overflow:'hidden',backgroundColor:C.cream},header:{height:56,paddingHorizontal:20,backgroundColor:C.paper,flexDirection:'row',alignItems:'center',justifyContent:'space-between',borderBottomWidth:1,borderColor:C.line},wordmark:{fontFamily:'serif',fontSize:16,letterSpacing:2.4},badge:{position:'absolute',right:-7,top:-7,minWidth:16,height:16,borderRadius:8,backgroundColor:C.gold,alignItems:'center',justifyContent:'center'},badgeText:{color:C.white,fontSize:10,fontWeight:'700'},hero:{height:560,justifyContent:'flex-end',backgroundColor:C.ink},heroShade:{height:'100%',justifyContent:'flex-end',padding:24,paddingBottom:32},heroTag:{alignSelf:'flex-start',borderWidth:1,borderColor:'rgba(255,255,255,.45)',paddingHorizontal:10,paddingVertical:6,marginBottom:12},heroTagText:{fontSize:9,color:C.white,letterSpacing:1.7,fontWeight:'700'},kickerLight:{fontSize:10,letterSpacing:2.5,color:'#e2c38f',fontWeight:'700',marginBottom:10},heroTitle:{fontFamily:'serif',fontSize:40,lineHeight:46,color:C.white,marginBottom:10},heroSub:{fontSize:13,lineHeight:20,color:'rgba(255,255,255,.78)',maxWidth:310,marginBottom:22},heroActions:{flexDirection:'row',gap:10},goldBtn:{backgroundColor:C.gold,paddingHorizontal:24,paddingVertical:15},ghostBtn:{borderWidth:1,borderColor:'rgba(255,255,255,.65)',paddingHorizontal:24,paddingVertical:15},ghostText:{color:C.white,fontSize:11,fontWeight:'800',letterSpacing:1.2},btnText:{color:C.white,fontSize:11,fontWeight:'800',letterSpacing:1.2},storyWrap:{backgroundColor:C.paper,paddingTop:24,paddingBottom:19},storyHeading:{fontFamily:'serif',fontSize:23,marginLeft:20},storyRow:{paddingHorizontal:18,gap:15,marginTop:16},story:{width:72,alignItems:'center'},storyRing:{width:67,height:67,borderRadius:34,padding:2.5},storyImg:{width:'100%',height:'100%',borderRadius:32,borderWidth:2,borderColor:C.paper},storyLabel:{fontSize:10,lineHeight:13,textAlign:'center',color:C.ink,marginTop:7},exclusive:{backgroundColor:C.ink,padding:28,alignItems:'center'},lockCircle:{width:42,height:42,borderRadius:21,borderWidth:1,borderColor:'rgba(189,149,90,.5)',alignItems:'center',justifyContent:'center',marginBottom:14},kicker:{fontSize:10,letterSpacing:2.2,color:C.gold,fontWeight:'800',marginBottom:8},between:{flexDirection:'row',alignItems:'center',justifyContent:'space-between'},sectionTitle:{fontFamily:'serif',fontSize:23},timer:{color:C.gold,fontWeight:'700'},body:{fontSize:14,lineHeight:21,color:C.muted,marginTop:10},countdown:{flexDirection:'row',alignItems:'flex-start',marginTop:24,marginBottom:22},countUnit:{alignItems:'center',minWidth:56},countNumber:{fontFamily:'serif',fontSize:35,color:C.gold,fontVariant:['tabular-nums']},countLabel:{fontSize:7,letterSpacing:1.2,color:'#777',marginTop:3},countSep:{fontFamily:'serif',fontSize:31,color:'rgba(189,149,90,.4)',marginHorizontal:3},exclusiveBtn:{borderWidth:1,borderColor:C.gold,paddingHorizontal:22,paddingVertical:13},exclusiveBtnText:{fontSize:10,letterSpacing:1.4,color:C.gold,fontWeight:'800'},section:{paddingTop:30,paddingLeft:20,paddingBottom:30,borderBottomWidth:1,borderColor:C.line},link:{fontSize:12,color:C.muted,marginRight:20},seeAll:{marginRight:20,flexDirection:'row',alignItems:'center',gap:6,backgroundColor:'#eee4d6',borderRadius:18,paddingHorizontal:13,paddingVertical:8},seeAllText:{fontSize:10,color:C.ink,fontWeight:'800',letterSpacing:.5},marquee:{backgroundColor:C.gold,paddingVertical:11,overflow:'hidden'},marqueeText:{fontSize:9,letterSpacing:1.7,color:C.white,fontWeight:'800',textAlign:'center'},card:{width:168,marginTop:16,backgroundColor:C.paper,borderRadius:18,paddingBottom:14,overflow:'hidden',borderWidth:1,borderColor:'#ece3d6',shadowColor:'#382d1f',shadowOpacity:.1,shadowRadius:12,shadowOffset:{width:0,height:5},elevation:3},wide:{flex:1,width:'auto',minWidth:0},cardImg:{width:168,height:224,backgroundColor:C.line,borderTopLeftRadius:17,borderTopRightRadius:17},wideImg:{width:'100%',height:224},heart:{position:'absolute',right:9,top:9,width:34,height:34,borderRadius:17,backgroundColor:'rgba(255,253,249,.92)',alignItems:'center',justifyContent:'center'},pill:{position:'absolute',left:8,bottom:8,backgroundColor:'rgba(17,14,11,.84)',borderRadius:12,padding:6,flexDirection:'row',alignItems:'center',gap:5},dot:{width:6,height:6,borderRadius:3,backgroundColor:C.red},pillText:{color:C.white,fontSize:10,fontWeight:'700'},brand:{fontSize:9,letterSpacing:1.4,color:C.gold,fontWeight:'800',marginTop:11,marginHorizontal:12},productTitle:{fontFamily:'serif',fontSize:15,marginTop:4,marginHorizontal:12},price:{fontSize:13,fontWeight:'700',marginTop:7,marginHorizontal:12},moreCard:{width:150,height:306,marginTop:16,borderRadius:18,borderWidth:1.5,borderColor:C.gold,backgroundColor:'#f0e7d9',alignItems:'center',justifyContent:'center',padding:18},moreIcon:{width:48,height:48,borderRadius:24,backgroundColor:C.paper,alignItems:'center',justifyContent:'center',marginBottom:18},moreTitle:{fontFamily:'serif',fontSize:19,lineHeight:24,textAlign:'center',color:C.ink},moreCount:{fontSize:9,letterSpacing:1.2,color:C.gold,fontWeight:'800',marginTop:10},softBanner:{marginHorizontal:18,marginVertical:10,borderRadius:18,backgroundColor:'#e9dece',padding:18,flexDirection:'row',alignItems:'center',gap:13},softTitle:{fontFamily:'serif',fontSize:19,color:C.ink},softText:{fontSize:11,color:C.muted,marginTop:3},editorial:{backgroundColor:'#28231d',padding:24},editorialTitle:{fontFamily:'serif',fontSize:29,lineHeight:35,color:C.white,maxWidth:300},editorialText:{fontSize:13,lineHeight:20,color:'#aaa',marginTop:10,marginBottom:20},editorialGrid:{flexDirection:'row',gap:10},editorialCard:{flex:1},editorialImg:{width:'100%',height:170},editorialCardTitle:{fontFamily:'serif',fontSize:15,lineHeight:19,color:C.white,marginTop:9},trustBlock:{backgroundColor:C.ink,padding:22,gap:14},trust:{flexDirection:'row',alignItems:'center',gap:10},trustText:{fontSize:12,fontWeight:'600'},search:{margin:16,marginBottom:8,height:48,borderWidth:1,borderColor:C.line,backgroundColor:C.paper,flexDirection:'row',alignItems:'center',paddingHorizontal:14,gap:10},searchInput:{flex:1,fontSize:14},filterRail:{height:56,width:'100%'},chips:{paddingHorizontal:16,gap:8,height:56,alignItems:'center'},chip:{height:34,paddingHorizontal:15,borderRadius:17,borderWidth:1,borderColor:C.line,justifyContent:'center'},chipOn:{backgroundColor:C.ink},chipText:{fontSize:12,color:C.muted},catalogList:{width:'100%',maxWidth:'100%'},catalogColumns:{gap:12,justifyContent:'space-between',width:'100%'},grid:{paddingHorizontal:16,paddingBottom:24,width:'100%'},resultHead:{width:'100%',flexDirection:'row',alignItems:'center',justifyContent:'space-between',paddingVertical:14},result:{fontFamily:'serif',fontSize:18},sort:{fontSize:11,color:C.muted},empty:{flex:1,alignItems:'center',justifyContent:'center',padding:40},emptyTitle:{fontFamily:'serif',fontSize:25,textAlign:'center',marginTop:18,marginBottom:9},center:{fontSize:14,lineHeight:21,color:C.muted,textAlign:'center'},outline:{borderWidth:1,borderColor:C.ink,padding:14,marginTop:24},outlineText:{fontSize:11,fontWeight:'800',letterSpacing:1},bidCard:{backgroundColor:C.paper,padding:12,flexDirection:'row',alignItems:'center',gap:14},bidImg:{width:88,height:110},bidTitle:{fontFamily:'serif',fontSize:16,marginTop:4},bidTime:{fontSize:11,color:C.red,marginTop:8},pageTitle:{fontFamily:'serif',fontSize:29},profile:{alignItems:'center',paddingVertical:20,paddingBottom:30},avatar:{width:70,height:70,borderRadius:35,borderWidth:1,borderColor:C.gold,alignItems:'center',justifyContent:'center'},avatarText:{fontFamily:'serif',fontSize:22,color:C.gold},profileTitle:{fontFamily:'serif',fontSize:28,marginTop:16},blackBtn:{width:'100%',height:50,backgroundColor:C.ink,alignItems:'center',justifyContent:'center',marginTop:22},menu:{height:58,borderTopWidth:1,borderColor:C.line,flexDirection:'row',alignItems:'center',gap:13},menuText:{flex:1,fontSize:14},detailImg:{width:'100%',height:470},back:{position:'absolute',top:16,left:16,width:42,height:42,borderRadius:21,backgroundColor:C.white,alignItems:'center',justifyContent:'center'},detailHeart:{position:'absolute',top:16,right:16,width:42,height:42,borderRadius:21,backgroundColor:C.white,alignItems:'center',justifyContent:'center'},detailBody:{padding:22},certified:{fontSize:10,color:C.gold,fontWeight:'800'},detailTitle:{fontFamily:'serif',fontSize:28,marginTop:8},priceBig:{fontFamily:'serif',fontSize:24,marginTop:14},bidBox:{backgroundColor:'#eee3d2',padding:14,marginTop:16,flexDirection:'row',justifyContent:'space-between'},bidLabel:{fontSize:10,fontWeight:'800'},bidCount:{fontSize:11,color:C.red,fontWeight:'700'},info:{flexDirection:'row',justifyContent:'space-between',paddingVertical:16,borderBottomWidth:1,borderColor:C.line},infoLabel:{fontSize:12,color:C.muted},infoValue:{fontSize:12,fontWeight:'600'},description:{fontSize:14,lineHeight:22,color:C.muted,marginVertical:20},promise:{backgroundColor:C.paper,padding:16,gap:12},bottom:{backgroundColor:C.paper,padding:12,paddingHorizontal:20,flexDirection:'row',alignItems:'center',gap:18},actionLabel:{fontSize:9,color:C.muted},actionPrice:{fontSize:17,fontWeight:'800'},blackFlex:{flex:1,height:50,backgroundColor:C.ink,alignItems:'center',justifyContent:'center'},searchPage:{height:64,paddingHorizontal:20,flexDirection:'row',alignItems:'center',gap:15},searchPageInput:{flex:1,fontFamily:'serif',fontSize:21},searchResult:{flexDirection:'row',gap:14,alignItems:'center',backgroundColor:C.paper,padding:10},thumb:{width:72,height:88},modalHead:{height:58,paddingHorizontal:20,flexDirection:'row',alignItems:'center',justifyContent:'space-between'},cartImg:{width:82,height:102},checkout:{padding:20,backgroundColor:C.paper},login:{flex:1,backgroundColor:C.ink,padding:28,justifyContent:'center'},loginClose:{position:'absolute',right:24,top:60},logo:{fontFamily:'serif',fontSize:40,color:C.gold,textAlign:'center',marginBottom:36},loginTitle:{fontFamily:'serif',fontSize:35,lineHeight:43,color:C.white,textAlign:'center',marginBottom:38},loginInput:{height:54,borderBottomWidth:1,borderColor:'#665b4e',color:C.white},goldWide:{height:52,backgroundColor:C.gold,alignItems:'center',justifyContent:'center',marginTop:22},loginLegal:{fontSize:10,color:'#888',textAlign:'center',marginTop:22},luxuryBar:{height:78,backgroundColor:C.paper,borderTopWidth:1,borderColor:C.line,flexDirection:'row',paddingHorizontal:8,paddingTop:6,paddingBottom:8},luxuryItem:{flex:1,alignItems:'center',justifyContent:'center',position:'relative'},luxuryItemOn:{backgroundColor:'#f1e9dc',borderRadius:18},navIcon:{height:26,alignItems:'center',justifyContent:'center'},navIconOn:{transform:[{translateY:-1}]},navLabel:{fontSize:8.5,color:C.muted,marginTop:2,fontWeight:'600'},navLabelOn:{color:C.ink,fontWeight:'800'},activeLine:{position:'absolute',top:0,width:18,height:2,borderRadius:1,backgroundColor:C.gold}});
-
-
-
-
-
-
-
+const s = StyleSheet.create({
+  safe: {
+    flex: 1,
+    width: "100%",
+    maxWidth: "100%",
+    overflow: "hidden",
+    backgroundColor: C.cream,
+  },
+  header: {
+    height: 56,
+    paddingHorizontal: 20,
+    backgroundColor: C.paper,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    borderColor: C.line,
+  },
+  wordmark: { fontFamily: "serif", fontSize: 16, letterSpacing: 2.4 },
+  badge: {
+    position: "absolute",
+    right: -7,
+    top: -7,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: C.gold,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  badgeText: { color: C.white, fontSize: 10, fontWeight: "700" },
+  hero: { height: 560, justifyContent: "flex-end", backgroundColor: C.ink },
+  heroShade: {
+    height: "100%",
+    justifyContent: "flex-end",
+    padding: 24,
+    paddingBottom: 32,
+  },
+  heroTag: {
+    alignSelf: "flex-start",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,.45)",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginBottom: 12,
+  },
+  heroTagText: {
+    fontSize: 9,
+    color: C.white,
+    letterSpacing: 1.7,
+    fontWeight: "700",
+  },
+  kickerLight: {
+    fontSize: 10,
+    letterSpacing: 2.5,
+    color: "#e2c38f",
+    fontWeight: "700",
+    marginBottom: 10,
+  },
+  heroTitle: {
+    fontFamily: "serif",
+    fontSize: 40,
+    lineHeight: 46,
+    color: C.white,
+    marginBottom: 10,
+  },
+  heroSub: {
+    fontSize: 13,
+    lineHeight: 20,
+    color: "rgba(255,255,255,.78)",
+    maxWidth: 310,
+    marginBottom: 22,
+  },
+  heroActions: { flexDirection: "row", gap: 10 },
+  goldBtn: {
+    backgroundColor: C.gold,
+    paddingHorizontal: 24,
+    paddingVertical: 15,
+  },
+  ghostBtn: {
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,.65)",
+    paddingHorizontal: 24,
+    paddingVertical: 15,
+  },
+  ghostText: {
+    color: C.white,
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 1.2,
+  },
+  btnText: {
+    color: C.white,
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 1.2,
+  },
+  storyWrap: { backgroundColor: C.paper, paddingTop: 24, paddingBottom: 19 },
+  storyHeading: { fontFamily: "serif", fontSize: 23, marginLeft: 20 },
+  storyRow: { paddingHorizontal: 18, gap: 15, marginTop: 16 },
+  story: { width: 72, alignItems: "center" },
+  storyRing: { width: 67, height: 67, borderRadius: 34, padding: 2.5 },
+  storyImg: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 32,
+    borderWidth: 2,
+    borderColor: C.paper,
+  },
+  storyLabel: {
+    fontSize: 10,
+    lineHeight: 13,
+    textAlign: "center",
+    color: C.ink,
+    marginTop: 7,
+  },
+  exclusive: { backgroundColor: C.ink, padding: 28, alignItems: "center" },
+  lockCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 1,
+    borderColor: "rgba(189,149,90,.5)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 14,
+  },
+  kicker: {
+    fontSize: 10,
+    letterSpacing: 2.2,
+    color: C.gold,
+    fontWeight: "800",
+    marginBottom: 8,
+  },
+  between: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  sectionTitle: { fontFamily: "serif", fontSize: 23 },
+  timer: { color: C.gold, fontWeight: "700" },
+  body: { fontSize: 14, lineHeight: 21, color: C.muted, marginTop: 10 },
+  countdown: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginTop: 24,
+    marginBottom: 22,
+  },
+  countUnit: { alignItems: "center", minWidth: 56 },
+  countNumber: {
+    fontFamily: "serif",
+    fontSize: 35,
+    color: C.gold,
+    fontVariant: ["tabular-nums"],
+  },
+  countLabel: { fontSize: 7, letterSpacing: 1.2, color: "#777", marginTop: 3 },
+  countSep: {
+    fontFamily: "serif",
+    fontSize: 31,
+    color: "rgba(189,149,90,.4)",
+    marginHorizontal: 3,
+  },
+  exclusiveBtn: {
+    borderWidth: 1,
+    borderColor: C.gold,
+    paddingHorizontal: 22,
+    paddingVertical: 13,
+  },
+  exclusiveBtnText: {
+    fontSize: 10,
+    letterSpacing: 1.4,
+    color: C.gold,
+    fontWeight: "800",
+  },
+  section: {
+    paddingTop: 30,
+    paddingLeft: 20,
+    paddingBottom: 30,
+    borderBottomWidth: 1,
+    borderColor: C.line,
+  },
+  link: { fontSize: 12, color: C.muted, marginRight: 20 },
+  seeAll: {
+    marginRight: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "#eee4d6",
+    borderRadius: 18,
+    paddingHorizontal: 13,
+    paddingVertical: 8,
+  },
+  seeAllText: {
+    fontSize: 10,
+    color: C.ink,
+    fontWeight: "800",
+    letterSpacing: 0.5,
+  },
+  marquee: { backgroundColor: C.gold, paddingVertical: 11, overflow: "hidden" },
+  marqueeText: {
+    fontSize: 9,
+    letterSpacing: 1.7,
+    color: C.white,
+    fontWeight: "800",
+    textAlign: "center",
+  },
+  card: {
+    width: 168,
+    marginTop: 16,
+    backgroundColor: C.paper,
+    borderRadius: 18,
+    paddingBottom: 14,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#ece3d6",
+    shadowColor: "#382d1f",
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 3,
+  },
+  wide: { flex: 1, width: "auto", minWidth: 0 },
+  cardImg: {
+    width: 168,
+    height: 224,
+    backgroundColor: C.line,
+    borderTopLeftRadius: 17,
+    borderTopRightRadius: 17,
+  },
+  wideImg: { width: "100%", height: 224 },
+  heart: {
+    position: "absolute",
+    right: 9,
+    top: 9,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: "rgba(255,253,249,.92)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  pill: {
+    position: "absolute",
+    left: 8,
+    bottom: 8,
+    backgroundColor: "rgba(17,14,11,.84)",
+    borderRadius: 12,
+    padding: 6,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.red },
+  pillText: { color: C.white, fontSize: 10, fontWeight: "700" },
+  brand: {
+    fontSize: 9,
+    letterSpacing: 1.4,
+    color: C.gold,
+    fontWeight: "800",
+    marginTop: 11,
+    marginHorizontal: 12,
+  },
+  productTitle: {
+    fontFamily: "serif",
+    fontSize: 15,
+    marginTop: 4,
+    marginHorizontal: 12,
+  },
+  price: {
+    fontSize: 13,
+    fontWeight: "700",
+    marginTop: 7,
+    marginHorizontal: 12,
+  },
+  moreCard: {
+    width: 150,
+    height: 306,
+    marginTop: 16,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: C.gold,
+    backgroundColor: "#f0e7d9",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 18,
+  },
+  moreIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: C.paper,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 18,
+  },
+  moreTitle: {
+    fontFamily: "serif",
+    fontSize: 19,
+    lineHeight: 24,
+    textAlign: "center",
+    color: C.ink,
+  },
+  moreCount: {
+    fontSize: 9,
+    letterSpacing: 1.2,
+    color: C.gold,
+    fontWeight: "800",
+    marginTop: 10,
+  },
+  softBanner: {
+    marginHorizontal: 18,
+    marginVertical: 10,
+    borderRadius: 18,
+    backgroundColor: "#e9dece",
+    padding: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 13,
+  },
+  softTitle: { fontFamily: "serif", fontSize: 19, color: C.ink },
+  softText: { fontSize: 11, color: C.muted, marginTop: 3 },
+  editorial: { backgroundColor: "#28231d", padding: 24 },
+  editorialTitle: {
+    fontFamily: "serif",
+    fontSize: 29,
+    lineHeight: 35,
+    color: C.white,
+    maxWidth: 300,
+  },
+  editorialText: {
+    fontSize: 13,
+    lineHeight: 20,
+    color: "#aaa",
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  editorialGrid: { flexDirection: "row", gap: 10 },
+  editorialCard: { flex: 1 },
+  editorialImg: { width: "100%", height: 170 },
+  editorialCardTitle: {
+    fontFamily: "serif",
+    fontSize: 15,
+    lineHeight: 19,
+    color: C.white,
+    marginTop: 9,
+  },
+  trustBlock: { backgroundColor: C.ink, padding: 22, gap: 14 },
+  trust: { flexDirection: "row", alignItems: "center", gap: 10 },
+  trustText: { fontSize: 12, fontWeight: "600" },
+  search: {
+    margin: 16,
+    marginBottom: 8,
+    height: 48,
+    borderWidth: 1,
+    borderColor: C.line,
+    backgroundColor: C.paper,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 14,
+    gap: 10,
+  },
+  searchInput: { flex: 1, fontSize: 14 },
+  filterRail: { height: 56, width: "100%" },
+  chips: { paddingHorizontal: 16, gap: 8, height: 56, alignItems: "center" },
+  chip: {
+    height: 34,
+    paddingHorizontal: 15,
+    borderRadius: 17,
+    borderWidth: 1,
+    borderColor: C.line,
+    justifyContent: "center",
+  },
+  chipOn: { backgroundColor: C.ink },
+  chipText: { fontSize: 12, color: C.muted },
+  catalogList: { width: "100%", maxWidth: "100%" },
+  catalogColumns: { gap: 12, justifyContent: "space-between", width: "100%" },
+  grid: { paddingHorizontal: 16, paddingBottom: 24, width: "100%" },
+  resultHead: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 14,
+  },
+  result: { fontFamily: "serif", fontSize: 18 },
+  sort: { fontSize: 11, color: C.muted },
+  empty: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 40,
+  },
+  emptyTitle: {
+    fontFamily: "serif",
+    fontSize: 25,
+    textAlign: "center",
+    marginTop: 18,
+    marginBottom: 9,
+  },
+  center: { fontSize: 14, lineHeight: 21, color: C.muted, textAlign: "center" },
+  outline: { borderWidth: 1, borderColor: C.ink, padding: 14, marginTop: 24 },
+  outlineText: { fontSize: 11, fontWeight: "800", letterSpacing: 1 },
+  bidCard: {
+    backgroundColor: C.paper,
+    padding: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
+  bidImg: { width: 88, height: 110 },
+  bidTitle: { fontFamily: "serif", fontSize: 16, marginTop: 4 },
+  bidTime: { fontSize: 11, color: C.red, marginTop: 8 },
+  pageTitle: { fontFamily: "serif", fontSize: 29 },
+  profile: { alignItems: "center", paddingVertical: 20, paddingBottom: 30 },
+  avatar: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    borderWidth: 1,
+    borderColor: C.gold,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarText: { fontFamily: "serif", fontSize: 22, color: C.gold },
+  profileTitle: { fontFamily: "serif", fontSize: 28, marginTop: 16 },
+  blackBtn: {
+    width: "100%",
+    height: 50,
+    backgroundColor: C.ink,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 22,
+  },
+  menu: {
+    height: 58,
+    borderTopWidth: 1,
+    borderColor: C.line,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 13,
+  },
+  menuText: { flex: 1, fontSize: 14 },
+  detailImg: { width: "100%", height: 470 },
+  back: {
+    position: "absolute",
+    top: 16,
+    left: 16,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: C.white,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  detailHeart: {
+    position: "absolute",
+    top: 16,
+    right: 16,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: C.white,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  detailBody: { padding: 22 },
+  certified: { fontSize: 10, color: C.gold, fontWeight: "800" },
+  detailTitle: { fontFamily: "serif", fontSize: 28, marginTop: 8 },
+  priceBig: { fontFamily: "serif", fontSize: 24, marginTop: 14 },
+  bidBox: {
+    backgroundColor: "#eee3d2",
+    padding: 14,
+    marginTop: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  bidLabel: { fontSize: 10, fontWeight: "800" },
+  bidCount: { fontSize: 11, color: C.red, fontWeight: "700" },
+  info: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderColor: C.line,
+  },
+  infoLabel: { fontSize: 12, color: C.muted },
+  infoValue: { fontSize: 12, fontWeight: "600" },
+  description: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: C.muted,
+    marginVertical: 20,
+  },
+  promise: { backgroundColor: C.paper, padding: 16, gap: 12 },
+  bottom: {
+    backgroundColor: C.paper,
+    padding: 12,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 18,
+  },
+  actionLabel: { fontSize: 9, color: C.muted },
+  actionPrice: { fontSize: 17, fontWeight: "800" },
+  blackFlex: {
+    flex: 1,
+    height: 50,
+    backgroundColor: C.ink,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  searchPage: {
+    height: 64,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 15,
+  },
+  searchPageInput: { flex: 1, fontFamily: "serif", fontSize: 21 },
+  searchResult: {
+    flexDirection: "row",
+    gap: 14,
+    alignItems: "center",
+    backgroundColor: C.paper,
+    padding: 10,
+  },
+  thumb: { width: 72, height: 88 },
+  modalHead: {
+    height: 58,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  cartImg: { width: 82, height: 102 },
+  checkout: { padding: 20, backgroundColor: C.paper },
+  login: {
+    flex: 1,
+    backgroundColor: C.ink,
+    padding: 28,
+    justifyContent: "center",
+  },
+  loginClose: { position: "absolute", right: 24, top: 60 },
+  logo: {
+    fontFamily: "serif",
+    fontSize: 40,
+    color: C.gold,
+    textAlign: "center",
+    marginBottom: 36,
+  },
+  loginTitle: {
+    fontFamily: "serif",
+    fontSize: 35,
+    lineHeight: 43,
+    color: C.white,
+    textAlign: "center",
+    marginBottom: 38,
+  },
+  loginInput: {
+    height: 54,
+    borderBottomWidth: 1,
+    borderColor: "#665b4e",
+    color: C.white,
+  },
+  goldWide: {
+    height: 52,
+    backgroundColor: C.gold,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 22,
+  },
+  loginLegal: {
+    fontSize: 10,
+    color: "#888",
+    textAlign: "center",
+    marginTop: 22,
+  },
+  luxuryBar: {
+    height: 78,
+    backgroundColor: C.paper,
+    borderTopWidth: 1,
+    borderColor: C.line,
+    flexDirection: "row",
+    paddingHorizontal: 8,
+    paddingTop: 6,
+    paddingBottom: 8,
+  },
+  luxuryItem: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  luxuryItemOn: { backgroundColor: "#f1e9dc", borderRadius: 18 },
+  navIcon: { height: 26, alignItems: "center", justifyContent: "center" },
+  navIconOn: { transform: [{ translateY: -1 }] },
+  navLabel: { fontSize: 8.5, color: C.muted, marginTop: 2, fontWeight: "600" },
+  navLabelOn: { color: C.ink, fontWeight: "800" },
+  activeLine: {
+    position: "absolute",
+    top: 0,
+    width: 18,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: C.gold,
+  },
+  webStage: {
+    flex: 1,
+    minHeight: "100%",
+    backgroundColor: "#d8cdbc",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  phoneFrame: {
+    width: 430,
+    maxWidth: "100%",
+    backgroundColor: C.ink,
+    borderRadius: 42,
+    borderWidth: 8,
+    borderColor: "#17140f",
+    overflow: "hidden",
+    shadowColor: "#17100a",
+    shadowOpacity: 0.34,
+    shadowRadius: 35,
+    shadowOffset: { width: 0, height: 18 },
+    elevation: 18,
+  },
+  webStatus: {
+    height: 28,
+    backgroundColor: C.paper,
+    paddingHorizontal: 22,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  webTime: { fontSize: 10, fontWeight: "800", color: C.ink },
+  webSignals: { flexDirection: "row", alignItems: "center", gap: 5 },
+  phoneScreen: {
+    flex: 1,
+    width: "100%",
+    overflow: "hidden",
+    backgroundColor: C.cream,
+  },
+  homeIndicator: {
+    position: "absolute",
+    bottom: 5,
+    left: "50%",
+    marginLeft: -53,
+    width: 106,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "rgba(23,20,15,.78)",
+  },
+});
