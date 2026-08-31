@@ -30,6 +30,7 @@ npx expo export --platform all
 ## Liens
 - Instagram : https://www.instagram.com/ashley.musicoff/
 - TikTok : https://www.tiktok.com/@ashley.musicoff
+- Beatport (iM Electronica) : https://www.beatport.com/release/uno-dos-tres/4772465
 - Tous les liens : https://linktr.ee/ashley.musicoff
 - Contact &amp; booking (SKORM Agency) : Hello@skorm-agency.com
 

@@ -58,6 +58,10 @@ const C = {
 const IG = "https://www.instagram.com/ashley.musicoff/";
 const TIKTOK = "https://www.tiktok.com/@ashley.musicoff";
 const LINKTREE = "https://linktr.ee/ashley.musicoff";
+// Sorties réelles vérifiées (label iM Electronica) sur Beatport
+const BEATPORT_UNO = "https://www.beatport.com/release/uno-dos-tres/4772465";
+const BEATPORT_INFERNO = "https://www.beatport.com/release/psychedelic-inferno/4938848";
+const BEATPORT = BEATPORT_UNO;
 // Liens routés vers le Linktree officiel tant que les URLs directes ne sont pas fournies.
 const SPOTIFY = LINKTREE;
 const SOUNDCLOUD = LINKTREE;
@@ -83,6 +87,7 @@ const PLATFORMS: PlatformLink[] = [
   { label: "Spotify", lib: "fa", icon: "spotify", url: SPOTIFY, colors: ["#1DB954", "#14833B"], handle: "Singles & EP" },
   { label: "Apple Music", lib: "ion", icon: "logo-apple", url: APPLE, colors: ["#FB5C74", "#FA2D6F"], handle: "Discographie" },
   { label: "YouTube", lib: "ion", icon: "logo-youtube", url: YOUTUBE, colors: ["#FF3B3B", "#CC0000"], handle: "Clips & mixes" },
+  { label: "Beatport", lib: "ion", icon: "disc", url: BEATPORT, colors: ["#01FF95", "#0aa36a"], handle: "iM Electronica" },
   { label: "Tous les liens", lib: "feather", icon: "link", url: LINKTREE, colors: [C.violet, C.cyan], handle: "Linktree" },
 ];
 
@@ -146,6 +151,8 @@ type Track = {
   art: string;
   tag: string;
   fresh?: boolean;
+  label?: string;
+  link?: string;
 };
 
 type MixSet = {
@@ -176,24 +183,28 @@ const TRACKS: Track[] = [
     title: "UNO DOS TRES",
     kind: "Single",
     bpm: 150,
-    year: "2026",
+    year: "2024",
     length: "5:36",
     color: [C.pink, C.cyan],
     art: "https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=900&q=90",
     tag: "Acid techno",
     fresh: true,
+    label: "iM Electronica",
+    link: BEATPORT_UNO,
   },
   {
     id: "t1",
-    title: "DOLL MACHINE",
+    title: "PSYCHEDELIC INFERNO",
     kind: "Single",
     bpm: 152,
-    year: "2026",
+    year: "2025",
     length: "5:42",
     color: [C.pink, C.violet],
     art: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=900&q=90",
     tag: "Hard techno",
     fresh: true,
+    label: "iM Electronica",
+    link: BEATPORT_INFERNO,
   },
   {
     id: "t2",
@@ -661,6 +672,7 @@ function Home({ navigation }: any) {
             <Text style={st.featureTitle}>{hero.title}</Text>
             <Text style={st.featureMeta}>
               {hero.bpm} BPM · {hero.length}
+              {hero.label ? ` · ${hero.label}` : ""}
             </Text>
             <View style={st.featurePlay}>
               <Ionicons name="play" size={13} color={C.white} />
@@ -1116,9 +1128,18 @@ function NowPlaying({ navigation }: any) {
           </Pressable>
         </View>
 
-        <Pressable style={st.npStream} onPress={() => openURL(IG)}>
-          <Ionicons name="logo-instagram" size={16} color={C.white} />
-          <Text style={st.npStreamText}>Écouter la version complète</Text>
+        <Pressable
+          style={st.npStream}
+          onPress={() => openURL(current.link || IG)}
+        >
+          <Ionicons
+            name={current.link ? "disc" : "logo-instagram"}
+            size={16}
+            color={C.white}
+          />
+          <Text style={st.npStreamText}>
+            {current.link ? "Acheter sur Beatport" : "Écouter la version complète"}
+          </Text>
         </Pressable>
       </SafeAreaView>
     </View>
