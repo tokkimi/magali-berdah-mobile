@@ -1,9 +1,11 @@
 # ASHLEY — site & application officiels
 
 Application Expo / React Native (iOS, Android et preview web) pour l'artiste
-**ASHLEY** — *Techno Doll*, DJ &amp; productrice ([@ashley.musicoff](https://www.instagram.com/ashley.musicoff/)).
+**ASHLEY** — *Techno Doll*, DJ &amp; productrice **hard techno** ([@ashley.musicoff](https://www.instagram.com/ashley.musicoff/)).
 
-Direction artistique : lumineux, chrome hyperpop, énergie techno.
+> **« Escape the mind, Enter the rave »**
+
+Direction artistique : lumineux, chrome hyperpop, énergie rave.
 
 ## Expérience incluse
 - accueil éditorial avec dernière sortie et lecture instantanée ;

@@ -4,22 +4,22 @@
 ASHLEY
 
 ## Sous-titre iOS
-Techno Doll · sons, sets &amp; dates
+Hard techno · sons, sets &amp; dates
 
 ## Description courte Android
 L'app officielle d'ASHLEY : écoutez les sons, suivez les dates et bookez.
 
 ## Description
-Bienvenue dans l'univers d'ASHLEY — *Techno Doll*, DJ et productrice. Écoutez ses
-sons et ses sets, découvrez ses dernières sorties, suivez la tournée en clubs,
-warehouses et open airs, parcourez la galerie backstage et envoyez votre demande
-de booking en un tap.
+Escape the mind, Enter the rave. Bienvenue dans l'univers d'ASHLEY — *Techno Doll*,
+DJ et productrice **hard techno**. Écoutez ses sons et ses sets, découvrez ses
+dernières sorties, suivez la tournée en clubs, warehouses et open airs, parcourez
+la galerie backstage et envoyez votre demande de booking en un tap.
 
 Fonctionnalités : discographie complète, lecteur audio avec mini-lecteur global,
 lecture aléatoire, agenda des dates live, billetterie, galerie et contact booking.
 
 ## Mots-clés iOS
-techno,dj,musique,électro,rave,set,club,ashley
+hard techno,techno,dj,rave,électro,set,club,ashley
 
 ## Catégorie
 Musique

@@ -33,7 +33,8 @@ import { Feather, Ionicons } from "@expo/vector-icons";
 /* --------------------------------------------------------------------------
    ASHLEY — « TECHNO DOLL »
    Site officiel / application de l'artiste Ashley (@ashley.musicoff).
-   Direction artistique : lumineux, hyperpop-chrome, énergie techno.
+   Hard techno · « Escape the mind, Enter the rave »
+   Direction artistique : lumineux, hyperpop-chrome, énergie rave.
    -------------------------------------------------------------------------- */
 
 const C = {
@@ -56,6 +57,7 @@ const C = {
 
 const IG = "https://www.instagram.com/ashley.musicoff/";
 const BOOKING = "ashley.booking.music@gmail.com";
+const SLOGAN = "Escape the mind, Enter the rave";
 
 type Track = {
   id: string;
@@ -97,91 +99,91 @@ const TRACKS: Track[] = [
     id: "t1",
     title: "DOLL MACHINE",
     kind: "Single",
-    bpm: 138,
+    bpm: 152,
     year: "2026",
-    length: "6:12",
+    length: "5:42",
     color: [C.pink, C.violet],
     art: "https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=900&q=90",
-    tag: "Peak time",
+    tag: "Hard techno",
     fresh: true,
   },
   {
     id: "t2",
     title: "NEON CATHEDRAL",
     kind: "Single",
-    bpm: 134,
+    bpm: 150,
     year: "2026",
-    length: "7:04",
+    length: "6:10",
     color: [C.violet, C.cyan],
     art: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=900&q=90",
-    tag: "Melodic techno",
+    tag: "Hard groove",
     fresh: true,
   },
   {
     id: "t3",
     title: "ACID BARBIE",
     kind: "Single",
-    bpm: 142,
+    bpm: 156,
     year: "2025",
-    length: "5:48",
+    length: "5:28",
     color: [C.magenta, C.pink],
     art: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=900&q=90",
-    tag: "Acid",
+    tag: "Acid rave",
   },
   {
     id: "t4",
     title: "HYPERDRIVE",
     kind: "EP",
-    bpm: 145,
+    bpm: 158,
     year: "2025",
-    length: "6:33",
+    length: "5:55",
     color: [C.cyan, C.violet],
     art: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=900&q=90",
-    tag: "Hard groove",
+    tag: "Hard techno",
   },
   {
     id: "t5",
     title: "PVC HEART",
     kind: "Single",
-    bpm: 130,
+    bpm: 148,
     year: "2025",
-    length: "5:20",
+    length: "5:12",
     color: [C.pink, C.cyan],
     art: "https://images.unsplash.com/photo-1526478806334-5fd488fcaabc?w=900&q=90",
-    tag: "Hypnotic",
+    tag: "Rave",
   },
   {
     id: "t6",
     title: "CHROME TEARS",
     kind: "Remix",
-    bpm: 136,
+    bpm: 150,
     year: "2025",
-    length: "6:58",
+    length: "6:04",
     color: [C.violet, C.magenta],
     art: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=900&q=90",
-    tag: "Rework",
+    tag: "Hard rework",
   },
   {
     id: "t7",
     title: "RAVE DOLL",
     kind: "Single",
-    bpm: 140,
+    bpm: 154,
     year: "2024",
-    length: "5:55",
+    length: "5:34",
     color: [C.magenta, C.violet],
     art: "https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=900&q=90",
-    tag: "Rave",
+    tag: "Rave anthem",
   },
   {
     id: "t8",
     title: "OVERDRIVE — Club Édit",
     kind: "Édit",
-    bpm: 137,
+    bpm: 160,
     year: "2024",
-    length: "6:41",
+    length: "5:48",
     color: [C.cyan, C.pink],
     art: "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=900&q=90",
-    tag: "Club",
+    tag: "Hard techno",
   },
 ];
 
@@ -505,10 +507,9 @@ function Home({ navigation }: any) {
               </View>
             </View>
             <View style={st.heroBottom}>
+              <Text style={st.heroGenre}>HARD TECHNO</Text>
               <Text style={st.heroName}>ASHLEY</Text>
-              <Text style={st.heroTagline}>
-                DJ &amp; productrice · techno lumineuse, chrome &amp; hyperpop
-              </Text>
+              <Text style={st.heroSlogan}>« {SLOGAN} »</Text>
               <View style={st.heroBtns}>
                 <GlowButton
                   label="Écouter maintenant"
@@ -542,6 +543,17 @@ function Home({ navigation }: any) {
               <Text style={st.statLabel}>{l}</Text>
             </View>
           ))}
+        </View>
+
+        {/* SLOGAN */}
+        <View style={st.sloganBand}>
+          <LinearGradient
+            colors={[C.pink, C.violet, C.cyan]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={StyleSheet.absoluteFill}
+          />
+          <Text style={st.sloganText}>{SLOGAN.toUpperCase()}</Text>
         </View>
 
         {/* DERNIÈRE SORTIE */}
@@ -774,8 +786,9 @@ function Live() {
             colors={["rgba(34,227,227,0.25)", "rgba(123,60,255,0.72)"]}
             style={[StyleSheet.absoluteFill, { borderRadius: 26 }]}
           />
-          <Text style={st.liveHeroKicker}>TECHNO DOLL TOUR</Text>
+          <Text style={st.liveHeroKicker}>HARD TECHNO TOUR</Text>
           <Text style={st.liveHeroTitle}>Clubs, warehouses{"\n"}& open airs</Text>
+          <Text style={st.liveHeroSlogan}>« {SLOGAN} »</Text>
         </ImageBackground>
 
         <View style={{ paddingHorizontal: 18, marginTop: 8 }}>
@@ -862,7 +875,8 @@ function Contact() {
             <Text style={st.contactInitial}>A</Text>
           </View>
           <Text style={st.contactName}>ASHLEY</Text>
-          <Text style={st.contactRole}>Techno Doll · DJ &amp; Productrice</Text>
+          <Text style={st.contactRole}>Hard Techno · DJ &amp; Productrice</Text>
+          <Text style={st.contactSlogan}>« {SLOGAN} »</Text>
           <View style={st.socialRow}>
             <Pressable style={st.social} onPress={() => openURL(IG)}>
               <Feather name="instagram" size={18} color={C.violet} />
@@ -1284,8 +1298,16 @@ const st = StyleSheet.create({
   liveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: C.cyan },
   livePillText: { color: C.white, fontSize: 11, fontWeight: "900", letterSpacing: 2 },
   heroBottom: { padding: 20 },
+  heroGenre: { color: C.cyan, fontSize: 12, fontWeight: "900", letterSpacing: 4, marginBottom: 2 },
   heroName: { color: C.white, fontSize: 52, fontWeight: "900", letterSpacing: -1 },
-  heroTagline: { color: "rgba(255,255,255,0.92)", fontSize: 13, marginTop: 4, marginBottom: 16, fontWeight: "600" },
+  heroSlogan: {
+    color: "rgba(255,255,255,0.95)",
+    fontSize: 14,
+    marginTop: 4,
+    marginBottom: 16,
+    fontWeight: "800",
+    fontStyle: "italic",
+  },
   heroBtns: { flexDirection: "row", alignItems: "center", gap: 10 },
   heroGhost: {
     paddingHorizontal: 18,
@@ -1340,6 +1362,23 @@ const st = StyleSheet.create({
   stat: { flex: 1, alignItems: "center" },
   statNum: { fontSize: 22, fontWeight: "900", color: C.ink },
   statLabel: { fontSize: 11, color: C.muted, marginTop: 2, fontWeight: "600" },
+
+  sloganBand: {
+    marginHorizontal: 18,
+    marginTop: 18,
+    borderRadius: 20,
+    overflow: "hidden",
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    alignItems: "center",
+  },
+  sloganText: {
+    color: C.white,
+    fontSize: 14,
+    fontWeight: "900",
+    letterSpacing: 1.5,
+    textAlign: "center",
+  },
 
   /* sections */
   sectionHead: {
@@ -1474,6 +1513,7 @@ const st = StyleSheet.create({
   liveHero: { height: 190, margin: 18, borderRadius: 26, overflow: "hidden", justifyContent: "flex-end", padding: 20 },
   liveHeroKicker: { color: C.white, fontSize: 11, fontWeight: "900", letterSpacing: 2 },
   liveHeroTitle: { color: C.white, fontSize: 26, fontWeight: "900", marginTop: 4, lineHeight: 30 },
+  liveHeroSlogan: { color: "rgba(255,255,255,0.92)", fontSize: 12.5, fontWeight: "800", fontStyle: "italic", marginTop: 6 },
   showRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -1558,6 +1598,7 @@ const st = StyleSheet.create({
   contactInitial: { fontSize: 40, fontWeight: "900", color: C.white },
   contactName: { fontSize: 26, fontWeight: "900", color: C.ink, marginTop: 12, letterSpacing: 1 },
   contactRole: { fontSize: 13, color: C.muted, marginTop: 2, fontWeight: "700" },
+  contactSlogan: { fontSize: 12.5, color: C.violet, marginTop: 6, fontWeight: "800", fontStyle: "italic" },
   socialRow: { flexDirection: "row", gap: 12, marginTop: 14 },
   social: {
     width: 46,
