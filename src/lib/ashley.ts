@@ -170,6 +170,14 @@ export function ashleyTemplate(): BuiltTemplate {
         ]),
       },
       {
+        title: 'Galerie', slug: 'galerie', isHome: false, showInNav: true,
+        blocks: seedBlocks([
+          { type: 'heading', content: { text: 'Galerie' }, style: { align: 'center', fontSize: 36, paddingY: 16 } },
+          { type: 'text', content: { text: 'Ajoutez vos photos ici depuis l’admin (bouton « Importer »).' }, style: { align: 'center', fontSize: 16, paddingY: 4 } },
+          { type: 'gallery', content: { columns: 3, images: [BIO_IMG, HERO_IMG, BIO_IMG, HERO_IMG, BIO_IMG, HERO_IMG] } },
+        ]),
+      },
+      {
         title: 'Contact', slug: 'contact', isHome: false, showInNav: true,
         blocks: seedBlocks([
           { type: 'heading', content: { text: 'Contact & booking' }, style: { align: 'center', fontSize: 36, paddingY: 16 } },
