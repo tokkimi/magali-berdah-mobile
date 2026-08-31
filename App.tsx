@@ -3,13 +3,16 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
-  Alert,
+  Animated,
+  Easing,
   FlatList,
   Image,
   ImageBackground,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -27,1010 +30,1137 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { Feather, Ionicons } from "@expo/vector-icons";
 
+/* --------------------------------------------------------------------------
+   ASHLEY — « TECHNO DOLL »
+   Site officiel / application de l'artiste Ashley (@ashley.musicoff).
+   Direction artistique : lumineux, hyperpop-chrome, énergie techno.
+   -------------------------------------------------------------------------- */
+
 const C = {
-  ink: "#17140f",
-  muted: "#7c746a",
-  gold: "#bd955a",
-  cream: "#f6f1e9",
-  paper: "#fffdf9",
-  line: "#e7dfd3",
-  red: "#a7322d",
+  ink: "#1b1030",
+  night: "#2a1650",
+  muted: "#8a7bb0",
+  soft: "#b9aede",
+  pink: "#ff2e93",
+  magenta: "#ff4fb2",
+  violet: "#7b3cff",
+  cyan: "#22e3e3",
+  lilac: "#f4ebff",
+  petal: "#ffe9f6",
+  paper: "#fbf6ff",
+  cloud: "#ffffff",
+  line: "#ece0fb",
+  glass: "rgba(123,60,255,0.08)",
   white: "#fff",
 };
-type Product = {
+
+const IG = "https://www.instagram.com/ashley.musicoff/";
+const BOOKING = "ashley.booking.music@gmail.com";
+
+type Track = {
   id: string;
-  brand: string;
   title: string;
-  image: string;
-  price: number;
-  bid?: number;
-  auction?: boolean;
-  ends?: string;
-  category: string;
-  certified: boolean;
-  condition: string;
+  kind: "Single" | "EP" | "Remix" | "Édit";
+  bpm: number;
+  year: string;
+  length: string;
+  color: [string, string];
+  art: string;
+  tag: string;
+  fresh?: boolean;
 };
-const P: Product[] = [
+
+type MixSet = {
+  id: string;
+  title: string;
+  venue: string;
+  length: string;
+  plays: string;
+  art: string;
+  color: [string, string];
+};
+
+type Show = {
+  id: string;
+  date: string;
+  day: string;
+  city: string;
+  country: string;
+  venue: string;
+  status: "Billets" | "Complet" | "Bientôt";
+};
+
+/* ------------------------------ Contenu ---------------------------------- */
+
+const TRACKS: Track[] = [
   {
-    id: "1",
-    brand: "SAINT LAURENT",
-    title: "Icare matelassé bordeaux",
-    image:
-      "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=900&q=90",
-    price: 1200,
-    bid: 1460,
-    auction: true,
-    ends: "02h 18m",
-    category: "Sacs",
-    certified: true,
-    condition: "Excellent",
+    id: "t1",
+    title: "DOLL MACHINE",
+    kind: "Single",
+    bpm: 138,
+    year: "2026",
+    length: "6:12",
+    color: [C.pink, C.violet],
+    art: "https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=900&q=90",
+    tag: "Peak time",
+    fresh: true,
   },
   {
-    id: "2",
-    brand: "FENDI",
-    title: "Baguette denim FF",
-    image:
-      "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=900&q=90",
-    price: 1800,
-    bid: 2150,
-    auction: true,
-    ends: "04h 42m",
-    category: "Sacs",
-    certified: true,
-    condition: "Excellent",
+    id: "t2",
+    title: "NEON CATHEDRAL",
+    kind: "Single",
+    bpm: 134,
+    year: "2026",
+    length: "7:04",
+    color: [C.violet, C.cyan],
+    art: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=900&q=90",
+    tag: "Melodic techno",
+    fresh: true,
   },
   {
-    id: "3",
-    brand: "HERMÈS",
-    title: "Birkin 30 Togo fauve",
-    image:
-      "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=900&q=90",
-    price: 8500,
-    bid: 9200,
-    auction: true,
-    ends: "1j 08h",
-    category: "Sacs",
-    certified: true,
-    condition: "Excellent",
+    id: "t3",
+    title: "ACID BARBIE",
+    kind: "Single",
+    bpm: 142,
+    year: "2025",
+    length: "5:48",
+    color: [C.magenta, C.pink],
+    art: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=900&q=90",
+    tag: "Acid",
   },
   {
-    id: "4",
-    brand: "CARTIER",
-    title: "Tank Must acier",
-    image:
-      "https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=900&q=90",
-    price: 1800,
-    category: "Montres",
-    certified: true,
-    condition: "Très bon",
+    id: "t4",
+    title: "HYPERDRIVE",
+    kind: "EP",
+    bpm: 145,
+    year: "2025",
+    length: "6:33",
+    color: [C.cyan, C.violet],
+    art: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=900&q=90",
+    tag: "Hard groove",
   },
   {
-    id: "5",
-    brand: "CHANEL",
-    title: "Robe tweed rose poudré",
-    image:
-      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=900&q=90",
-    price: 3200,
-    category: "Mode",
-    certified: true,
-    condition: "Excellent",
+    id: "t5",
+    title: "PVC HEART",
+    kind: "Single",
+    bpm: 130,
+    year: "2025",
+    length: "5:20",
+    color: [C.pink, C.cyan],
+    art: "https://images.unsplash.com/photo-1526478806334-5fd488fcaabc?w=900&q=90",
+    tag: "Hypnotic",
   },
   {
-    id: "6",
-    brand: "THE ROW",
-    title: "Escarpins crème talon bloc",
-    image:
-      "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=900&q=90",
-    price: 280,
-    category: "Chaussures",
-    certified: true,
-    condition: "Excellent",
+    id: "t6",
+    title: "CHROME TEARS",
+    kind: "Remix",
+    bpm: 136,
+    year: "2025",
+    length: "6:58",
+    color: [C.violet, C.magenta],
+    art: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=900&q=90",
+    tag: "Rework",
   },
   {
-    id: "7",
-    brand: "JACQUEMUS",
-    title: "Le Bambino cuir ivoire",
-    image:
-      "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=900&q=90",
-    price: 490,
-    category: "Sacs",
-    certified: true,
-    condition: "Comme neuf",
+    id: "t7",
+    title: "RAVE DOLL",
+    kind: "Single",
+    bpm: 140,
+    year: "2024",
+    length: "5:55",
+    color: [C.magenta, C.violet],
+    art: "https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=900&q=90",
+    tag: "Rave",
   },
   {
-    id: "8",
-    brand: "DIOR",
-    title: "Lady Dior cannage noir",
-    image:
-      "https://images.unsplash.com/photo-1559563458-527698bf5295?w=900&q=90",
-    price: 4100,
-    category: "Sacs",
-    certified: true,
-    condition: "Excellent",
-  },
-  {
-    id: "9",
-    brand: "ROLEX",
-    title: "Datejust cadran champagne",
-    image:
-      "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=900&q=90",
-    price: 7200,
-    category: "Montres",
-    certified: true,
-    condition: "Très bon",
-  },
-  {
-    id: "10",
-    brand: "LOUIS VUITTON",
-    title: "Malle souple monogramme",
-    image:
-      "https://images.unsplash.com/photo-1585488434455-1e7b6b37cbd6?w=900&q=90",
-    price: 2450,
-    category: "Sacs",
-    certified: true,
-    condition: "Excellent",
-  },
-  {
-    id: "11",
-    brand: "CELINE",
-    title: "Lunettes Triomphe écaille",
-    image:
-      "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=900&q=90",
-    price: 340,
-    category: "Mode",
-    certified: true,
-    condition: "Comme neuf",
-  },
-  {
-    id: "12",
-    brand: "BOTTEGA VENETA",
-    title: "Mules Lido tressées",
-    image:
-      "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=900&q=90",
-    price: 390,
-    category: "Chaussures",
-    certified: true,
-    condition: "Excellent",
+    id: "t8",
+    title: "OVERDRIVE — Club Édit",
+    kind: "Édit",
+    bpm: 137,
+    year: "2024",
+    length: "6:41",
+    color: [C.cyan, C.pink],
+    art: "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=900&q=90",
+    tag: "Club",
   },
 ];
-const Stack = createNativeStackNavigator(),
-  Tabs = createBottomTabNavigator();
-const money = (n: number) =>
-  new Intl.NumberFormat("fr-FR", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(n);
-type State = {
-  favorites: Set<string>;
-  toggle: (id: string) => void;
-  cart: Product[];
-  add: (p: Product) => void;
-};
-const Shop = createContext<State>({
-    favorites: new Set(),
-    toggle: () => {},
-    cart: [],
-    add: () => {},
-  }),
-  useShop = () => useContext(Shop);
 
-function Header({ navigation, title = "MAGALI BERDAH" }: any) {
-  const { cart } = useShop();
-  return (
-    <View style={s.header}>
-      <Pressable onPress={() => navigation.navigate("Search")}>
-        <Feather name="search" size={21} />
-      </Pressable>
-      <Text style={s.wordmark}>{title}</Text>
-      <Pressable onPress={() => navigation.navigate("Cart")}>
-        <Feather name="shopping-bag" size={21} />
-        {cart.length > 0 && (
-          <View style={s.badge}>
-            <Text style={s.badgeText}>{cart.length}</Text>
-          </View>
-        )}
-      </Pressable>
-    </View>
-  );
-}
-function Card({ item, navigation, wide = false }: any) {
-  const { favorites, toggle } = useShop();
-  return (
-    <Pressable
-      style={[s.card, wide && s.wide]}
-      onPress={() => navigation.navigate("Product", { id: item.id })}
-    >
-      <View>
-        <Image
-          source={{ uri: item.image }}
-          style={[s.cardImg, wide && s.wideImg]}
-        />
-        <Pressable
-          style={s.heart}
-          onPress={() => {
-            Haptics.selectionAsync();
-            toggle(item.id);
-          }}
-        >
-          <Ionicons
-            name={favorites.has(item.id) ? "heart" : "heart-outline"}
-            size={19}
-            color={favorites.has(item.id) ? C.red : C.ink}
-          />
-        </Pressable>
-        {item.auction && (
-          <View style={s.pill}>
-            <View style={s.dot} />
-            <Text style={s.pillText}>{item.ends}</Text>
-          </View>
-        )}
-      </View>
-      <Text style={s.brand}>{item.brand}</Text>
-      <Text numberOfLines={1} style={s.productTitle}>
-        {item.title}
-      </Text>
-      <Text style={s.price}>
-        {item.auction
-          ? `Enchère ${money(item.bid || item.price)}`
-          : money(item.price)}
-      </Text>
-    </Pressable>
-  );
-}
-function Trust({ icon, title, dark = false }: any) {
-  return (
-    <View style={s.trust}>
-      <Ionicons name={icon} size={20} color={C.gold} />
-      <Text style={[s.trustText, dark && { color: C.white }]}>{title}</Text>
-    </View>
-  );
-}
-function Countdown() {
-  const [left, setLeft] = useState(2 * 3600 + 18 * 60 + 34);
+const MIXES: MixSet[] = [
+  {
+    id: "m1",
+    title: "TECHNO DOLL — Warehouse 001",
+    venue: "Live set · 62 min",
+    length: "62:00",
+    plays: "48k",
+    art: "https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=900&q=90",
+    color: [C.pink, C.violet],
+  },
+  {
+    id: "m2",
+    title: "Sunrise B2B — Open Air",
+    venue: "Live set · 74 min",
+    length: "74:00",
+    plays: "31k",
+    art: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=900&q=90",
+    color: [C.cyan, C.violet],
+  },
+  {
+    id: "m3",
+    title: "Peak Time Podcast #12",
+    venue: "Studio mix · 58 min",
+    length: "58:00",
+    plays: "22k",
+    art: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=900&q=90",
+    color: [C.magenta, C.pink],
+  },
+];
+
+const SHOWS: Show[] = [
+  {
+    id: "s1",
+    date: "12",
+    day: "SEP",
+    city: "Paris",
+    country: "FR",
+    venue: "La Machine du Moulin Rouge",
+    status: "Billets",
+  },
+  {
+    id: "s2",
+    date: "26",
+    day: "SEP",
+    city: "Berlin",
+    country: "DE",
+    venue: "RSO Berlin",
+    status: "Billets",
+  },
+  {
+    id: "s3",
+    date: "10",
+    day: "OCT",
+    city: "Amsterdam",
+    country: "NL",
+    venue: "Shelter — ADE",
+    status: "Complet",
+  },
+  {
+    id: "s4",
+    date: "24",
+    day: "OCT",
+    city: "London",
+    country: "UK",
+    venue: "FOLD",
+    status: "Billets",
+  },
+  {
+    id: "s5",
+    date: "15",
+    day: "NOV",
+    city: "Barcelona",
+    country: "ES",
+    venue: "Input High Fidelity",
+    status: "Bientôt",
+  },
+];
+
+const GALLERY = [
+  "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=700&q=90",
+  "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=700&q=90",
+  "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=700&q=90",
+  "https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=700&q=90",
+  "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=700&q=90",
+  "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=700&q=90",
+];
+
+/* ------------------------- Lecteur audio global -------------------------- */
+
+type PlayerState = {
+  current: Track | null;
+  playing: boolean;
+  progress: number; // 0..1
+  play: (t: Track) => void;
+  toggle: () => void;
+  next: () => void;
+  prev: () => void;
+  open: () => void;
+  liked: Set<string>;
+  like: (id: string) => void;
+};
+
+const Player = createContext<PlayerState>({
+  current: null,
+  playing: false,
+  progress: 0,
+  play: () => {},
+  toggle: () => {},
+  next: () => {},
+  prev: () => {},
+  open: () => {},
+  liked: new Set(),
+  like: () => {},
+});
+const usePlayer = () => useContext(Player);
+
+const buzz = (style: Haptics.ImpactFeedbackStyle = Haptics.ImpactFeedbackStyle.Light) => {
+  if (Platform.OS !== "web") Haptics.impactAsync(style).catch(() => {});
+};
+const openURL = (url: string) => Linking.openURL(url).catch(() => {});
+
+/* ------------------------------ Composants ------------------------------- */
+
+function Equalizer({ on, tint = C.white, size = 3 }: { on: boolean; tint?: string; size?: number }) {
+  const bars = useRef([0, 1, 2, 3].map(() => new Animated.Value(0.35))).current;
   useEffect(() => {
-    const t = setInterval(
-      () => setLeft((v) => (v > 0 ? v - 1 : 24 * 3600)),
-      1000,
+    const loops = bars.map((v, i) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(v, {
+            toValue: 1,
+            duration: 320 + i * 90,
+            easing: Easing.inOut(Easing.quad),
+            useNativeDriver: false,
+          }),
+          Animated.timing(v, {
+            toValue: 0.3,
+            duration: 300 + i * 80,
+            easing: Easing.inOut(Easing.quad),
+            useNativeDriver: false,
+          }),
+        ]),
+      ),
     );
-    return () => clearInterval(t);
-  }, []);
-  const units = [
-    ["HEURES", Math.floor(left / 3600)],
-    ["MIN", Math.floor((left % 3600) / 60)],
-    ["SEC", left % 60],
-  ];
+    if (on) loops.forEach((l) => l.start());
+    else bars.forEach((v) => v.setValue(0.35));
+    return () => loops.forEach((l) => l.stop());
+  }, [on]);
   return (
-    <View style={s.countdown}>
-      {units.map(([label, value], i) => (
-        <React.Fragment key={String(label)}>
-          {i > 0 && <Text style={s.countSep}>:</Text>}
-          <View style={s.countUnit}>
-            <Text style={s.countNumber}>{String(value).padStart(2, "0")}</Text>
-            <Text style={s.countLabel}>{label}</Text>
-          </View>
-        </React.Fragment>
+    <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 2, height: 16 }}>
+      {bars.map((v, i) => (
+        <Animated.View
+          key={i}
+          style={{
+            width: size,
+            borderRadius: 2,
+            backgroundColor: tint,
+            height: v.interpolate({ inputRange: [0, 1], outputRange: [4, 16] }),
+          }}
+        />
       ))}
     </View>
   );
 }
-function StoryRail({ navigation }: any) {
-  const stories = [
-    ["Vente privée", P[2]],
-    ["Sacs iconiques", P[0]],
-    ["Montres", P[3]],
-    ["Nouveautés", P[4]],
-    ["Moins de 500 €", P[5]],
-  ];
+
+function Logo({ small = false }: { small?: boolean }) {
   return (
-    <View style={s.storyWrap}>
-      <View style={s.between}>
-        <Text style={s.storyHeading}>Explorer</Text>
-        <Text style={s.link}>Toutes les catégories ›</Text>
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+      <View style={st.logoDot}>
+        <LinearGradient
+          colors={[C.pink, C.violet, C.cyan]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
       </View>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={s.storyRow}
+      <Text style={[st.logoText, small && { fontSize: 15 }]}>ASHLEY</Text>
+    </View>
+  );
+}
+
+function TopBar({ title, sub }: { title?: string; sub?: string }) {
+  return (
+    <View style={st.topBar}>
+      <View>
+        {title ? (
+          <>
+            <Text style={st.topKicker}>{sub}</Text>
+            <Text style={st.topTitle}>{title}</Text>
+          </>
+        ) : (
+          <Logo />
+        )}
+      </View>
+      <Pressable
+        style={st.igBtn}
+        onPress={() => {
+          buzz();
+          openURL(IG);
+        }}
       >
-        {stories.map(([label, p]: any) => (
-          <Pressable
-            key={label}
-            style={s.story}
-            onPress={() => navigation.navigate("Product", { id: p.id })}
-          >
-            <LinearGradient colors={[C.gold, "#ead6b5"]} style={s.storyRing}>
-              <Image source={{ uri: p.image }} style={s.storyImg} />
-            </LinearGradient>
-            <Text numberOfLines={2} style={s.storyLabel}>
-              {label}
-            </Text>
-          </Pressable>
-        ))}
-      </ScrollView>
+        <Feather name="instagram" size={16} color={C.white} />
+      </Pressable>
     </View>
   );
 }
-function Editorial({ navigation }: any) {
+
+function GlowButton({
+  label,
+  icon,
+  onPress,
+  soft = false,
+}: {
+  label: string;
+  icon?: any;
+  onPress?: () => void;
+  soft?: boolean;
+}) {
+  if (soft)
+    return (
+      <Pressable style={st.softBtn} onPress={onPress}>
+        {icon && <Ionicons name={icon} size={16} color={C.violet} />}
+        <Text style={st.softBtnText}>{label}</Text>
+      </Pressable>
+    );
   return (
-    <View style={s.editorial}>
-      <Text style={s.kickerLight}>LE JOURNAL MAGALI</Text>
-      <Text style={s.editorialTitle}>Les pièces qui traversent le temps</Text>
-      <Text style={s.editorialText}>
-        Conseils, histoires de maisons et secrets d’authentification par nos
-        experts.
-      </Text>
-      <View style={s.editorialGrid}>
-        <Pressable
-          style={s.editorialCard}
-          onPress={() => navigation.navigate("Catalogue")}
-        >
-          <Image source={{ uri: P[3].image }} style={s.editorialImg} />
-          <Text style={s.editorialCardTitle}>L’art de choisir une montre</Text>
-        </Pressable>
-        <Pressable
-          style={s.editorialCard}
-          onPress={() => navigation.navigate("Catalogue")}
-        >
-          <Image source={{ uri: P[4].image }} style={s.editorialImg} />
-          <Text style={s.editorialCardTitle}>Les icônes de saison</Text>
-        </Pressable>
-      </View>
-    </View>
-  );
-}
-function MoreCard({ navigation, count }: any) {
-  return (
-    <Pressable
-      style={s.moreCard}
-      onPress={() => navigation.navigate("Catalogue")}
-    >
-      <View style={s.moreIcon}>
-        <Ionicons name="arrow-forward" size={22} color={C.gold} />
-      </View>
-      <Text style={s.moreTitle}>Voir toute{`\n`}la sélection</Text>
-      <Text style={s.moreCount}>{count}+ pièces</Text>
+    <Pressable onPress={onPress} style={st.glowWrap}>
+      <LinearGradient
+        colors={[C.pink, C.violet]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={st.glowBtn}
+      >
+        {icon && <Ionicons name={icon} size={17} color={C.white} />}
+        <Text style={st.glowText}>{label}</Text>
+      </LinearGradient>
     </Pressable>
   );
 }
-function Section({ title, label, items, navigation }: any) {
+
+function SectionTitle({ label, title, action }: { label: string; title: string; action?: string }) {
   return (
-    <View style={s.section}>
-      <Text style={s.kicker}>{label}</Text>
-      <View style={s.between}>
-        <Text style={s.sectionTitle}>{title}</Text>
-        <Pressable
-          style={s.seeAll}
-          onPress={() => navigation.navigate("Catalogue")}
-        >
-          <Text style={s.seeAllText}>Voir tout</Text>
-          <Ionicons name="arrow-forward" size={13} color={C.gold} />
-        </Pressable>
+    <View style={st.sectionHead}>
+      <View>
+        <Text style={st.sectionLabel}>{label}</Text>
+        <Text style={st.sectionTitle}>{title}</Text>
       </View>
-      <FlatList
-        horizontal
-        data={[...items, { id: `more-${label}`, more: true }]}
-        keyExtractor={(x: any) => x.id}
-        showsHorizontalScrollIndicator={false}
-        snapToInterval={180}
-        decelerationRate="fast"
-        contentContainerStyle={{ gap: 12, paddingRight: 20 }}
-        renderItem={({ item }: any) =>
-          item.more ? (
-            <MoreCard navigation={navigation} count={items.length * 12} />
-          ) : (
-            <Card item={item} navigation={navigation} />
-          )
-        }
-      />
+      {action && <Text style={st.sectionAction}>{action}</Text>}
     </View>
   );
 }
-function Home({ navigation }: any) {
+
+function TrackRow({ track, index }: { track: Track; index: number }) {
+  const { current, playing, play } = usePlayer();
+  const active = current?.id === track.id;
   return (
-    <SafeAreaView style={s.safe}>
-      <Header navigation={navigation} />
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <ImageBackground
-          source={require("./assets/hero-original.jpeg")}
-          style={s.hero}
-          imageStyle={{ resizeMode: "cover", width: "100%", height: "100%" }}
-        >
-          <LinearGradient
-            colors={[
-              "rgba(10,8,5,.02)",
-              "rgba(10,8,5,.18)",
-              "rgba(10,8,5,.92)",
-            ]}
-            style={s.heroShade}
-          >
-            <View style={s.heroTag}>
-              <Text style={s.heroTagText}>L’UNIVERS MAGALI BERDAH</Text>
-            </View>
-            <Text style={s.heroTitle}>L’exception{`\n`}à portée de main.</Text>
-            <Text style={s.heroSub}>
-              Mode, pièces rares et ventes exclusives sélectionnées pour vous.
-            </Text>
-            <View style={s.heroActions}>
-              <Pressable
-                style={s.goldBtn}
-                onPress={() => navigation.navigate("Catalogue")}
-              >
-                <Text style={s.btnText}>DÉCOUVRIR</Text>
-              </Pressable>
-              <Pressable
-                style={s.ghostBtn}
-                onPress={() => navigation.navigate("Enchères")}
-              >
-                <Text style={s.ghostText}>ENCHÈRES</Text>
-              </Pressable>
-            </View>
-          </LinearGradient>
-        </ImageBackground>
-        <StoryRail navigation={navigation} />
-        <View style={s.exclusive}>
-          <View style={s.lockCircle}>
-            <Ionicons name="lock-closed" size={17} color={C.gold} />
-          </View>
-          <Text style={s.kicker}>VENTE EXCLUSIVE · ACCÈS LIMITÉ</Text>
-          <Text
-            style={[s.sectionTitle, { color: C.white, textAlign: "center" }]}
-          >
-            La sélection ferme bientôt
-          </Text>
-          <Text style={[s.body, { color: "#aaa", textAlign: "center" }]}>
-            Des pièces d’exception disponibles pendant quelques heures
-            seulement.
-          </Text>
-          <Countdown />
-          <Pressable
-            style={s.exclusiveBtn}
-            onPress={() => navigation.navigate("Catalogue")}
-          >
-            <Text style={s.exclusiveBtnText}>ENTRER DANS LA VENTE →</Text>
-          </Pressable>
+    <Pressable
+      style={[st.trackRow, active && st.trackRowOn]}
+      onPress={() => {
+        buzz();
+        play(track);
+      }}
+    >
+      <View style={st.trackArtWrap}>
+        <Image source={{ uri: track.art }} style={st.trackArt} />
+        <View style={st.trackArtVeil}>
+          {active && playing ? (
+            <Equalizer on tint={C.white} />
+          ) : (
+            <Ionicons name="play" size={16} color={C.white} />
+          )}
         </View>
-        <Section
-          title="Enchères en direct"
-          label="DERNIÈRES CHANCES"
-          items={P.filter((x) => x.auction)}
-          navigation={navigation}
-        />
-        <View style={s.marquee}>
-          <Text style={s.marqueeText}>
-            AUTHENTIFIÉ · LIVRAISON SUIVIE · PAIEMENT SÉCURISÉ · RETOURS 14
-            JOURS
-          </Text>
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={[st.trackTitle, active && { color: C.violet }]} numberOfLines={1}>
+          {track.title}
+        </Text>
+        <Text style={st.trackMeta}>
+          {track.kind} · {track.bpm} BPM · {track.tag}
+        </Text>
+      </View>
+      {track.fresh && (
+        <View style={st.freshTag}>
+          <Text style={st.freshText}>NEW</Text>
         </View>
-        <Section
-          title="La sélection de Magali"
-          label="COUPS DE CŒUR"
-          items={[P[4], P[7], P[3]]}
-          navigation={navigation}
-        />
-        <Section
-          title="Les iconiques"
-          label="PIÈCES QUI TRAVERSENT LE TEMPS"
-          items={[P[8], P[9], P[2]]}
-          navigation={navigation}
-        />
-        <View style={s.softBanner}>
-          <Ionicons name="sparkles" size={19} color={C.gold} />
-          <View style={{ flex: 1 }}>
-            <Text style={s.softTitle}>Le luxe à moins de 500 €</Text>
-            <Text style={s.softText}>
-              Notre sélection accessible, toujours authentifiée.
-            </Text>
-          </View>
-          <Ionicons name="arrow-forward" size={19} color={C.gold} />
-        </View>
-        <Section
-          title="Petits plaisirs, grand style"
-          label="MOINS DE 500 €"
-          items={[P[5], P[6], P[10], P[11]]}
-          navigation={navigation}
-        />
-        <Editorial navigation={navigation} />
-        <View style={s.trustBlock}>
-          <Trust
-            dark
-            icon="shield-checkmark-outline"
-            title="Authenticité garantie par nos experts"
-          />
-          <Trust
-            dark
-            icon="diamond-outline"
-            title="Une sélection rare et exigeante"
-          />
-          <Trust
-            dark
-            icon="chatbubble-ellipses-outline"
-            title="Conciergerie à votre écoute"
-          />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+      )}
+      <Text style={st.trackLen}>{track.length}</Text>
+    </Pressable>
   );
 }
 
-function Catalogue({ navigation }: any) {
-  const [q, setQ] = useState(""),
-    [cat, setCat] = useState("Tout");
-  const cats = ["Tout", "Sacs", "Mode", "Montres", "Chaussures"],
-    data = P.filter(
-      (p) =>
-        (cat === "Tout" || p.category === cat) &&
-        `${p.brand} ${p.title}`.toLowerCase().includes(q.toLowerCase()),
-    );
+/* -------------------------------- Écrans --------------------------------- */
+
+function Home({ navigation }: any) {
+  const { play } = usePlayer();
+  const hero = TRACKS[0];
   return (
-    <SafeAreaView style={s.safe}>
-      <Header navigation={navigation} title="CATALOGUE" />
-      <View style={s.search}>
-        <Feather name="search" size={18} color={C.muted} />
-        <TextInput
-          placeholder="Marque, pièce, catégorie…"
-          value={q}
-          onChangeText={setQ}
-          style={s.searchInput}
+    <SafeAreaView style={st.safe} edges={["top"]}>
+      <TopBar />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 150 }}>
+        {/* HERO */}
+        <View style={st.hero}>
+          <ImageBackground
+            source={{
+              uri: "https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=1000&q=90",
+            }}
+            style={st.heroImg}
+            imageStyle={{ borderRadius: 30 }}
+          >
+            <LinearGradient
+              colors={["rgba(255,46,147,0.20)", "rgba(123,60,255,0.62)"]}
+              style={[StyleSheet.absoluteFill, { borderRadius: 30 }]}
+            />
+            <View style={st.heroTop}>
+              <View style={st.livePill}>
+                <View style={st.liveDot} />
+                <Text style={st.livePillText}>TECHNO DOLL</Text>
+              </View>
+            </View>
+            <View style={st.heroBottom}>
+              <Text style={st.heroName}>ASHLEY</Text>
+              <Text style={st.heroTagline}>
+                DJ &amp; productrice · techno lumineuse, chrome &amp; hyperpop
+              </Text>
+              <View style={st.heroBtns}>
+                <GlowButton
+                  label="Écouter maintenant"
+                  icon="play"
+                  onPress={() => {
+                    buzz(Haptics.ImpactFeedbackStyle.Medium);
+                    play(hero);
+                    navigation.navigate("NowPlaying");
+                  }}
+                />
+                <Pressable
+                  style={st.heroGhost}
+                  onPress={() => navigation.navigate("Tabs", { screen: "Live" })}
+                >
+                  <Text style={st.heroGhostText}>Dates live</Text>
+                </Pressable>
+              </View>
+            </View>
+          </ImageBackground>
+        </View>
+
+        {/* STATS */}
+        <View style={st.stats}>
+          {[
+            ["24k", "Abonnés"],
+            ["8", "Titres"],
+            ["120+", "Dates"],
+          ].map(([n, l]) => (
+            <View key={l} style={st.stat}>
+              <Text style={st.statNum}>{n}</Text>
+              <Text style={st.statLabel}>{l}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* DERNIÈRE SORTIE */}
+        <SectionTitle label="À LA UNE" title="Dernière sortie" />
+        <Pressable
+          style={st.featureCard}
+          onPress={() => {
+            buzz();
+            play(hero);
+            navigation.navigate("NowPlaying");
+          }}
+        >
+          <LinearGradient
+            colors={hero.color}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={st.featureGlow}
+          />
+          <Image source={{ uri: hero.art }} style={st.featureArt} />
+          <View style={{ flex: 1 }}>
+            <Text style={st.featureKind}>{hero.kind} · {hero.year}</Text>
+            <Text style={st.featureTitle}>{hero.title}</Text>
+            <Text style={st.featureMeta}>
+              {hero.bpm} BPM · {hero.length}
+            </Text>
+            <View style={st.featurePlay}>
+              <Ionicons name="play" size={13} color={C.white} />
+              <Text style={st.featurePlayText}>Lecture</Text>
+            </View>
+          </View>
+        </Pressable>
+
+        {/* SONS */}
+        <SectionTitle
+          label="LES SONS"
+          title="Titres phares"
+          action="Tout voir"
         />
-        <Feather name="sliders" size={18} />
-      </View>
-      <View style={s.filterRail}>
+        <View style={st.list}>
+          {TRACKS.slice(0, 4).map((t, i) => (
+            <TrackRow key={t.id} track={t} index={i} />
+          ))}
+        </View>
+        <View style={{ paddingHorizontal: 18, marginTop: 12 }}>
+          <GlowButton
+            label="Ouvrir la discographie"
+            icon="disc"
+            soft
+            onPress={() => navigation.navigate("Tabs", { screen: "Sons" })}
+          />
+        </View>
+
+        {/* MIXES */}
+        <SectionTitle label="EN LIVE" title="Sets & mixes" action="Écouter" />
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={s.chips}
+          contentContainerStyle={{ paddingHorizontal: 18, gap: 14 }}
         >
-          {cats.map((c) => (
-            <Pressable
-              key={c}
-              onPress={() => setCat(c)}
-              style={[s.chip, cat === c && s.chipOn]}
-            >
-              <Text style={[s.chipText, cat === c && { color: C.white }]}>
-                {c}
-              </Text>
+          {MIXES.map((m) => (
+            <Pressable key={m.id} style={st.mixCard} onPress={() => openURL(IG)}>
+              <ImageBackground
+                source={{ uri: m.art }}
+                style={st.mixImg}
+                imageStyle={{ borderRadius: 22 }}
+              >
+                <LinearGradient
+                  colors={["transparent", "rgba(27,16,48,0.82)"]}
+                  style={[StyleSheet.absoluteFill, { borderRadius: 22 }]}
+                />
+                <View style={st.mixPlay}>
+                  <Ionicons name="headset" size={16} color={C.white} />
+                </View>
+                <View style={st.mixInfo}>
+                  <Text style={st.mixTitle} numberOfLines={2}>
+                    {m.title}
+                  </Text>
+                  <Text style={st.mixMeta}>
+                    {m.venue} · {m.plays} écoutes
+                  </Text>
+                </View>
+              </ImageBackground>
             </Pressable>
           ))}
         </ScrollView>
-      </View>
-      <FlatList
-        style={s.catalogList}
-        data={data}
-        numColumns={2}
-        columnWrapperStyle={s.catalogColumns}
-        contentContainerStyle={s.grid}
-        renderItem={({ item }) => (
-          <Card item={item} navigation={navigation} wide />
-        )}
-        ListHeaderComponent={
-          <View style={s.resultHead}>
-            <Text style={s.result}>{data.length} pièces</Text>
-            <Text style={s.sort}>Trier : nouveautés⌄</Text>
+
+        {/* PROCHAINE DATE */}
+        <SectionTitle label="PROCHAINE DATE" title="On se voit où ?" />
+        <View style={{ paddingHorizontal: 18 }}>
+          <ShowRow show={SHOWS[0]} first />
+          <View style={{ marginTop: 12 }}>
+            <GlowButton
+              label="Voir toutes les dates"
+              icon="calendar"
+              soft
+              onPress={() => navigation.navigate("Tabs", { screen: "Live" })}
+            />
           </View>
-        }
-      />
-    </SafeAreaView>
-  );
-}
-function Empty({ icon, title, text, action, onPress }: any) {
-  return (
-    <View style={s.empty}>
-      <Ionicons name={icon} size={38} color={C.gold} />
-      <Text style={s.emptyTitle}>{title}</Text>
-      <Text style={s.center}>{text}</Text>
-      <Pressable style={s.outline} onPress={onPress}>
-        <Text style={s.outlineText}>{action}</Text>
-      </Pressable>
-    </View>
-  );
-}
-function Favorites({ navigation }: any) {
-  const { favorites } = useShop(),
-    data = P.filter((x) => favorites.has(x.id));
-  return (
-    <SafeAreaView style={s.safe}>
-      <Header navigation={navigation} title="FAVORIS" />
-      {data.length ? (
-        <FlatList
-          data={data}
-          numColumns={2}
-          columnWrapperStyle={{ gap: 12 }}
-          contentContainerStyle={s.grid}
-          renderItem={({ item }) => (
-            <Card item={item} navigation={navigation} wide />
-          )}
-        />
-      ) : (
-        <Empty
-          icon="heart-outline"
-          title="Votre sélection personnelle"
-          text="Enregistrez les pièces qui vous inspirent pour les retrouver ici."
-          action="EXPLORER LE CATALOGUE"
-          onPress={() => navigation.navigate("Catalogue")}
-        />
-      )}
-    </SafeAreaView>
-  );
-}
-function Auctions({ navigation }: any) {
-  return (
-    <SafeAreaView style={s.safe}>
-      <Header navigation={navigation} title="ENCHÈRES" />
-      <FlatList
-        data={P.filter((x) => x.auction)}
-        contentContainerStyle={{ padding: 20, gap: 16 }}
-        ListHeaderComponent={
-          <View>
-            <Text style={s.pageTitle}>Suivez chaque instant.</Text>
-            <Text style={s.body}>
-              Vos enchères actives et les ventes qui se terminent bientôt.
-            </Text>
-          </View>
-        }
-        renderItem={({ item }) => (
-          <Pressable
-            style={s.bidCard}
-            onPress={() => navigation.navigate("Product", { id: item.id })}
-          >
-            <Image source={{ uri: item.image }} style={s.bidImg} />
-            <View style={{ flex: 1 }}>
-              <Text style={s.brand}>{item.brand}</Text>
-              <Text style={s.bidTitle}>{item.title}</Text>
-              <Text style={s.price}>{money(item.bid || item.price)}</Text>
-              <Text style={s.bidTime}>● Se termine dans {item.ends}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={C.muted} />
-          </Pressable>
-        )}
-      />
-    </SafeAreaView>
-  );
-}
-function Account({ navigation }: any) {
-  return (
-    <SafeAreaView style={s.safe}>
-      <Header navigation={navigation} title="MON COMPTE" />
-      <ScrollView contentContainerStyle={{ padding: 20 }}>
-        <View style={s.profile}>
-          <View style={s.avatar}>
-            <Text style={s.avatarText}>MB</Text>
-          </View>
-          <Text style={s.profileTitle}>Bienvenue</Text>
-          <Text style={s.center}>
-            Connectez-vous pour suivre vos commandes, enchères et favoris sur
-            tous vos appareils.
-          </Text>
-          <Pressable
-            style={s.blackBtn}
-            onPress={() => navigation.navigate("Login")}
-          >
-            <Text style={s.btnText}>SE CONNECTER</Text>
-          </Pressable>
         </View>
-        {[
-          ["package", "Mes commandes"],
-          ["hammer", "Mes enchères"],
-          ["location", "Mes adresses"],
-          ["card", "Moyens de paiement"],
-          ["notifications", "Notifications"],
-          ["help-circle", "Aide & conciergerie"],
-        ].map(([i, t]) => (
-          <Pressable key={t} style={s.menu}>
-            <Ionicons name={`${i}-outline` as any} size={20} />
-            <Text style={s.menuText}>{t}</Text>
-            <Ionicons name="chevron-forward" size={17} color={C.muted} />
-          </Pressable>
-        ))}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function Product({ route, navigation }: any) {
-  const p = P.find((x) => x.id === route.params.id)!,
-    { favorites, toggle, add } = useShop();
+function Sons() {
+  const [filter, setFilter] = useState<string>("Tout");
+  const filters = ["Tout", "Single", "EP", "Remix", "Édit"];
+  const list = filter === "Tout" ? TRACKS : TRACKS.filter((t) => t.kind === filter);
+  const { play, open } = usePlayer();
   return (
-    <SafeAreaView style={s.safe}>
-      <ScrollView>
-        <View>
-          <Image source={{ uri: p.image }} style={s.detailImg} />
-          <Pressable style={s.back} onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={22} />
-          </Pressable>
-          <Pressable style={s.detailHeart} onPress={() => toggle(p.id)}>
-            <Ionicons
-              name={favorites.has(p.id) ? "heart" : "heart-outline"}
-              size={22}
-              color={favorites.has(p.id) ? C.red : C.ink}
-            />
-          </Pressable>
+    <SafeAreaView style={st.safe} edges={["top"]}>
+      <TopBar title="Les sons" sub="DISCOGRAPHIE" />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 150 }}>
+        <View style={st.filterRow}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 18 }}>
+            {filters.map((f) => {
+              const on = f === filter;
+              return (
+                <Pressable
+                  key={f}
+                  onPress={() => {
+                    buzz();
+                    setFilter(f);
+                  }}
+                  style={[st.chip, on && st.chipOn]}
+                >
+                  <Text style={[st.chipText, on && st.chipTextOn]}>{f}</Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
         </View>
-        <View style={s.detailBody}>
-          <View style={s.between}>
-            <Text style={s.brand}>{p.brand}</Text>
-            <Text style={s.certified}>✓ CERTIFIÉE</Text>
-          </View>
-          <Text style={s.detailTitle}>{p.title}</Text>
-          <Text style={s.priceBig}>{money(p.bid || p.price)}</Text>
-          {p.auction && (
-            <View style={s.bidBox}>
-              <Text style={s.bidLabel}>ENCHÈRE ACTUELLE</Text>
-              <Text style={s.bidCount}>Fin dans {p.ends}</Text>
-            </View>
-          )}
-          <View style={s.info}>
-            <Text style={s.infoLabel}>État</Text>
-            <Text style={s.infoValue}>{p.condition}</Text>
-          </View>
-          <View style={s.info}>
-            <Text style={s.infoLabel}>Authentification</Text>
-            <Text style={s.infoValue}>Contrôlée par nos experts</Text>
-          </View>
-          <Text style={s.description}>
-            Une pièce d’exception sélectionnée pour sa qualité et son caractère
-            intemporel. Livrée avec son certificat d’authenticité.
-          </Text>
-          <View style={s.promise}>
-            <Trust
-              icon="shield-checkmark-outline"
-              title="Authenticité garantie"
-            />
-            <Trust icon="cube-outline" title="Livraison suivie" />
-          </View>
-        </View>
-      </ScrollView>
-      <View style={s.bottom}>
-        <View>
-          <Text style={s.actionLabel}>
-            {p.auction ? "Prochaine mise" : "Prix"}
-          </Text>
-          <Text style={s.actionPrice}>
-            {money(p.auction ? (p.bid || p.price) + 50 : p.price)}
-          </Text>
-        </View>
+
         <Pressable
-          style={s.blackFlex}
+          style={st.shuffle}
           onPress={() => {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            p.auction
-              ? Alert.alert(
-                  "Enchère préparée",
-                  "Connectez-vous pour la confirmer.",
-                )
-              : (add(p), Alert.alert("Ajouté au panier", p.title));
+            buzz(Haptics.ImpactFeedbackStyle.Medium);
+            play(list[Math.floor(Math.random() * list.length)]);
+            open();
           }}
         >
-          <Text style={s.btnText}>
-            {p.auction ? "ENCHÉRIR" : "AJOUTER AU PANIER"}
+          <LinearGradient
+            colors={[C.cyan, C.violet]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={st.shuffleGrad}
+          >
+            <Ionicons name="shuffle" size={18} color={C.white} />
+            <Text style={st.shuffleText}>Lecture aléatoire</Text>
+          </LinearGradient>
+        </Pressable>
+
+        <View style={[st.list, { marginTop: 6 }]}>
+          {list.map((t, i) => (
+            <TrackRow key={t.id} track={t} index={i} />
+          ))}
+        </View>
+
+        <View style={st.streamCard}>
+          <Text style={st.streamTitle}>Retrouve tous les sons</Text>
+          <Text style={st.streamSub}>
+            Sets, extraits et sorties en avant-première sur Instagram.
           </Text>
-        </Pressable>
-      </View>
-    </SafeAreaView>
-  );
-}
-function Search({ navigation }: any) {
-  const [q, setQ] = useState(""),
-    data = q
-      ? P.filter((x) =>
-          `${x.brand} ${x.title}`.toLowerCase().includes(q.toLowerCase()),
-        )
-      : [];
-  return (
-    <SafeAreaView style={s.safe}>
-      <View style={s.searchPage}>
-        <Pressable onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={23} />
-        </Pressable>
-        <TextInput
-          autoFocus
-          placeholder="Que recherchez-vous ?"
-          value={q}
-          onChangeText={setQ}
-          style={s.searchPageInput}
-        />
-      </View>
-      <FlatList
-        data={data}
-        contentContainerStyle={{ padding: 20, gap: 12 }}
-        renderItem={({ item }) => (
-          <Pressable
-            style={s.searchResult}
-            onPress={() => navigation.replace("Product", { id: item.id })}
-          >
-            <Image source={{ uri: item.image }} style={s.thumb} />
-            <View>
-              <Text style={s.brand}>{item.brand}</Text>
-              <Text style={s.productTitle}>{item.title}</Text>
-              <Text style={s.price}>{money(item.bid || item.price)}</Text>
-            </View>
-          </Pressable>
-        )}
-      />
-    </SafeAreaView>
-  );
-}
-function Cart({ navigation }: any) {
-  const { cart } = useShop(),
-    total = cart.reduce((a, b) => a + b.price, 0);
-  return (
-    <SafeAreaView style={s.safe}>
-      <View style={s.modalHead}>
-        <Pressable onPress={() => navigation.goBack()}>
-          <Ionicons name="close" size={25} />
-        </Pressable>
-        <Text style={s.wordmark}>MON PANIER</Text>
-        <View style={{ width: 25 }} />
-      </View>
-      {cart.length ? (
-        <>
-          <FlatList
-            data={cart}
-            contentContainerStyle={{ padding: 20, gap: 14 }}
-            renderItem={({ item }) => (
-              <View style={s.searchResult}>
-                <Image source={{ uri: item.image }} style={s.cartImg} />
-                <View>
-                  <Text style={s.brand}>{item.brand}</Text>
-                  <Text style={s.productTitle}>{item.title}</Text>
-                  <Text style={s.price}>{money(item.price)}</Text>
-                </View>
-              </View>
-            )}
+          <GlowButton
+            label="@ashley.musicoff"
+            icon="logo-instagram"
+            onPress={() => openURL(IG)}
           />
-          <View style={s.checkout}>
-            <View style={s.between}>
-              <Text>Total</Text>
-              <Text style={s.priceBig}>{money(total)}</Text>
-            </View>
-            <Pressable
-              style={s.blackBtn}
-              onPress={() =>
-                Alert.alert(
-                  "Paiement sécurisé",
-                  "À connecter au compte marchand avant publication.",
-                )
-              }
-            >
-              <Text style={s.btnText}>PASSER AU PAIEMENT</Text>
-            </Pressable>
-          </View>
-        </>
-      ) : (
-        <Empty
-          icon="bag-outline"
-          title="Votre panier est vide"
-          text="Découvrez notre sélection de pièces authentifiées."
-          action="DÉCOUVRIR"
-          onPress={() => navigation.goBack()}
-        />
-      )}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
-function Login({ navigation }: any) {
+
+function ShowRow({ show, first = false }: { show: Show; first?: boolean }) {
+  const soldout = show.status === "Complet";
+  const soon = show.status === "Bientôt";
   return (
-    <SafeAreaView style={s.login}>
-      <Pressable style={s.loginClose} onPress={() => navigation.goBack()}>
-        <Ionicons name="close" size={25} color={C.white} />
-      </Pressable>
-      <Text style={s.logo}>MB</Text>
-      <Text style={s.loginTitle}>Votre vestiaire,{`\n`}partout avec vous.</Text>
-      <TextInput
-        placeholder="Adresse e-mail"
-        placeholderTextColor="#aaa"
-        style={s.loginInput}
-      />
+    <View style={[st.showRow, first && st.showRowFirst]}>
+      <View style={st.showDate}>
+        <Text style={st.showDay}>{show.date}</Text>
+        <Text style={st.showMonth}>{show.day}</Text>
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={st.showCity}>
+          {show.city} <Text style={st.showCountry}>· {show.country}</Text>
+        </Text>
+        <Text style={st.showVenue}>{show.venue}</Text>
+      </View>
       <Pressable
-        style={s.goldWide}
-        onPress={() =>
-          Alert.alert("Connexion", "À relier à l’API de production.")
-        }
+        style={[
+          st.ticket,
+          soldout && st.ticketOff,
+          soon && st.ticketSoon,
+        ]}
+        onPress={() => {
+          if (!soldout) {
+            buzz();
+            openURL(IG);
+          }
+        }}
       >
-        <Text style={s.btnText}>CONTINUER</Text>
+        <Text
+          style={[
+            st.ticketText,
+            soldout && { color: C.muted },
+            soon && { color: C.violet },
+          ]}
+        >
+          {show.status}
+        </Text>
       </Pressable>
-      <Text style={s.loginLegal}>
-        En continuant, vous acceptez nos conditions d’utilisation et notre
-        politique de confidentialité.
-      </Text>
-    </SafeAreaView>
-  );
-}
-function LuxuryTabBar({ state, navigation }: any) {
-  const icons: any = {
-    Accueil: "home",
-    Catalogue: "search",
-    Favoris: "heart",
-    Enchères: "hourglass",
-    Compte: "person",
-  };
-  return (
-    <View style={s.luxuryBar}>
-      {state.routes.map((route: any, index: number) => {
-        const active = state.index === index;
-        return (
-          <Pressable
-            key={route.key}
-            style={[s.luxuryItem, active && s.luxuryItemOn]}
-            onPress={() => navigation.navigate(route.name)}
-          >
-            <View style={[s.navIcon, active && s.navIconOn]}>
-              <Ionicons
-                name={`${icons[route.name]}${active ? "" : "-outline"}` as any}
-                size={active ? 21 : 20}
-                color={active ? C.ink : C.muted}
-              />
-            </View>
-            <Text style={[s.navLabel, active && s.navLabelOn]}>
-              {route.name === "Catalogue" ? "Découvrir" : route.name}
-            </Text>
-            {active && <View style={s.activeLine} />}
-          </Pressable>
-        );
-      })}
     </View>
   );
 }
+
+function Live() {
+  return (
+    <SafeAreaView style={st.safe} edges={["top"]}>
+      <TopBar title="En live" sub="TOUR 2026" />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 150 }}>
+        <ImageBackground
+          source={{
+            uri: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1000&q=90",
+          }}
+          style={st.liveHero}
+          imageStyle={{ borderRadius: 26 }}
+        >
+          <LinearGradient
+            colors={["rgba(34,227,227,0.25)", "rgba(123,60,255,0.72)"]}
+            style={[StyleSheet.absoluteFill, { borderRadius: 26 }]}
+          />
+          <Text style={st.liveHeroKicker}>TECHNO DOLL TOUR</Text>
+          <Text style={st.liveHeroTitle}>Clubs, warehouses{"\n"}& open airs</Text>
+        </ImageBackground>
+
+        <View style={{ paddingHorizontal: 18, marginTop: 8 }}>
+          {SHOWS.map((sh, i) => (
+            <ShowRow key={sh.id} show={sh} first={i === 0} />
+          ))}
+        </View>
+
+        <View style={st.bookCard}>
+          <View style={st.bookIcon}>
+            <Ionicons name="sparkles" size={18} color={C.white} />
+          </View>
+          <Text style={st.bookTitle}>Bookez ASHLEY</Text>
+          <Text style={st.bookSub}>
+            Club, festival, marque ou soirée privée — parlons-en.
+          </Text>
+          <GlowButton
+            label="Demande de booking"
+            icon="mail"
+            onPress={() => openURL(`mailto:${BOOKING}?subject=Booking%20ASHLEY`)}
+          />
+          <Text style={st.bookMail}>{BOOKING}</Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+function Galerie() {
+  const { width } = useWindowDimensions();
+  return (
+    <SafeAreaView style={st.safe} edges={["top"]}>
+      <TopBar title="Galerie" sub="BACKSTAGE & CLUB" />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 150 }}>
+        <View style={st.masonry}>
+          {GALLERY.map((uri, i) => (
+            <Pressable
+              key={i}
+              onPress={() => openURL(IG)}
+              style={[st.tile, i % 3 === 0 ? st.tileTall : st.tileShort]}
+            >
+              <Image source={{ uri }} style={st.tileImg} />
+              <LinearGradient
+                colors={["transparent", "rgba(27,16,48,0.5)"]}
+                style={[StyleSheet.absoluteFill, { borderRadius: 20 }]}
+              />
+            </Pressable>
+          ))}
+        </View>
+        <View style={{ paddingHorizontal: 18, marginTop: 8 }}>
+          <GlowButton
+            label="Plus de photos sur Instagram"
+            icon="logo-instagram"
+            soft
+            onPress={() => openURL(IG)}
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+function Contact() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [msg, setMsg] = useState("");
+  const send = () => {
+    buzz(Haptics.ImpactFeedbackStyle.Medium);
+    const body = encodeURIComponent(`${msg}\n\n— ${name} (${email})`);
+    openURL(`mailto:${BOOKING}?subject=Contact%20ASHLEY&body=${body}`);
+  };
+  return (
+    <SafeAreaView style={st.safe} edges={["top"]}>
+      <TopBar title="Contact" sub="BOOKING & PRESSE" />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 150 }}>
+        <View style={st.contactHero}>
+          <View style={st.contactAvatar}>
+            <LinearGradient
+              colors={[C.pink, C.violet, C.cyan]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
+            <Text style={st.contactInitial}>A</Text>
+          </View>
+          <Text style={st.contactName}>ASHLEY</Text>
+          <Text style={st.contactRole}>Techno Doll · DJ &amp; Productrice</Text>
+          <View style={st.socialRow}>
+            <Pressable style={st.social} onPress={() => openURL(IG)}>
+              <Feather name="instagram" size={18} color={C.violet} />
+            </Pressable>
+            <Pressable
+              style={st.social}
+              onPress={() => openURL(`mailto:${BOOKING}`)}
+            >
+              <Feather name="mail" size={18} color={C.violet} />
+            </Pressable>
+          </View>
+        </View>
+
+        <View style={st.form}>
+          <Text style={st.formLabel}>Ton nom</Text>
+          <TextInput
+            style={st.input}
+            placeholder="Nom / structure"
+            placeholderTextColor={C.soft}
+            value={name}
+            onChangeText={setName}
+          />
+          <Text style={st.formLabel}>Email</Text>
+          <TextInput
+            style={st.input}
+            placeholder="toi@email.com"
+            placeholderTextColor={C.soft}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
+          />
+          <Text style={st.formLabel}>Message</Text>
+          <TextInput
+            style={[st.input, st.inputArea]}
+            placeholder="Date, lieu, budget, détails…"
+            placeholderTextColor={C.soft}
+            multiline
+            value={msg}
+            onChangeText={setMsg}
+          />
+          <View style={{ marginTop: 8 }}>
+            <GlowButton label="Envoyer la demande" icon="send" onPress={send} />
+          </View>
+          <Text style={st.formMail}>{BOOKING}</Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+/* --------------------------- Lecteur plein écran ------------------------- */
+
+function NowPlaying({ navigation }: any) {
+  const { current, playing, toggle, next, prev, progress, liked, like } = usePlayer();
+  const spin = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    let loop: Animated.CompositeAnimation | null = null;
+    if (playing) {
+      loop = Animated.loop(
+        Animated.timing(spin, {
+          toValue: 1,
+          duration: 9000,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+      );
+      loop.start();
+    }
+    return () => loop?.stop();
+  }, [playing]);
+  if (!current)
+    return (
+      <SafeAreaView style={[st.safe, { justifyContent: "center", alignItems: "center" }]}>
+        <Text style={{ color: C.muted }}>Aucun titre en lecture</Text>
+      </SafeAreaView>
+    );
+  const rotate = spin.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "360deg"] });
+  const isLiked = liked.has(current.id);
+  return (
+    <View style={{ flex: 1 }}>
+      <LinearGradient
+        colors={[current.color[0], current.color[1], C.paper]}
+        style={StyleSheet.absoluteFill}
+      />
+      <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
+        <View style={st.npBar}>
+          <Pressable onPress={() => navigation.goBack()} style={st.npClose}>
+            <Ionicons name="chevron-down" size={24} color={C.white} />
+          </Pressable>
+          <Text style={st.npBarText}>EN LECTURE</Text>
+          <Pressable onPress={() => openURL(IG)} style={st.npClose}>
+            <Feather name="share" size={18} color={C.white} />
+          </Pressable>
+        </View>
+
+        <View style={st.npArtWrap}>
+          <Animated.View style={[st.npDisc, { transform: [{ rotate }] }]}>
+            <Image source={{ uri: current.art }} style={st.npArt} />
+            <View style={st.npHole} />
+          </Animated.View>
+        </View>
+
+        <View style={st.npInfo}>
+          <Text style={st.npTitle}>{current.title}</Text>
+          <Text style={st.npArtist}>ASHLEY · {current.tag}</Text>
+        </View>
+
+        <View style={st.npProgress}>
+          <View style={st.npTrack}>
+            <View style={[st.npFill, { width: `${Math.round(progress * 100)}%` }]} />
+            <View style={[st.npKnob, { left: `${Math.round(progress * 100)}%` }]} />
+          </View>
+          <View style={st.npTimes}>
+            <Text style={st.npTime}>
+              {fmt(progress * dur(current.length))}
+            </Text>
+            <Text style={st.npTime}>{current.length}</Text>
+          </View>
+        </View>
+
+        <View style={st.npControls}>
+          <Pressable onPress={() => like(current.id)}>
+            <Ionicons
+              name={isLiked ? "heart" : "heart-outline"}
+              size={26}
+              color={isLiked ? C.pink : C.white}
+            />
+          </Pressable>
+          <Pressable onPress={() => { buzz(); prev(); }}>
+            <Ionicons name="play-skip-back" size={30} color={C.white} />
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              buzz(Haptics.ImpactFeedbackStyle.Medium);
+              toggle();
+            }}
+            style={st.npPlay}
+          >
+            <Ionicons name={playing ? "pause" : "play"} size={32} color={current.color[1]} />
+          </Pressable>
+          <Pressable onPress={() => { buzz(); next(); }}>
+            <Ionicons name="play-skip-forward" size={30} color={C.white} />
+          </Pressable>
+          <Pressable onPress={() => openURL(IG)}>
+            <Feather name="instagram" size={24} color={C.white} />
+          </Pressable>
+        </View>
+
+        <Pressable style={st.npStream} onPress={() => openURL(IG)}>
+          <Ionicons name="logo-instagram" size={16} color={C.white} />
+          <Text style={st.npStreamText}>Écouter la version complète</Text>
+        </Pressable>
+      </SafeAreaView>
+    </View>
+  );
+}
+
+const dur = (s: string) => {
+  const [m, sec] = s.split(":").map(Number);
+  return m * 60 + sec;
+};
+const fmt = (total: number) => {
+  const m = Math.floor(total / 60);
+  const s = Math.floor(total % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
+};
+
+/* ------------------------------ Mini-player ------------------------------ */
+
+function MiniPlayer({ navigation }: any) {
+  const { current, playing, toggle } = usePlayer();
+  if (!current) return null;
+  return (
+    <Pressable style={st.mini} onPress={() => navigation.navigate("NowPlaying")}>
+      <LinearGradient
+        colors={current.color}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <Image source={{ uri: current.art }} style={st.miniArt} />
+      <View style={{ flex: 1 }}>
+        <Text style={st.miniTitle} numberOfLines={1}>
+          {current.title}
+        </Text>
+        <Text style={st.miniArtist}>ASHLEY</Text>
+      </View>
+      {playing && <Equalizer on tint={C.white} />}
+      <Pressable
+        onPress={(e) => {
+          e.stopPropagation?.();
+          buzz();
+          toggle();
+        }}
+        style={st.miniPlay}
+      >
+        <Ionicons name={playing ? "pause" : "play"} size={18} color={C.white} />
+      </Pressable>
+    </Pressable>
+  );
+}
+
+/* ------------------------------- Tab bar --------------------------------- */
+
+function DollTabBar({ state, navigation }: any) {
+  const icons: any = {
+    Accueil: "home",
+    Sons: "musical-notes",
+    Live: "calendar",
+    Galerie: "images",
+    Contact: "mail",
+  };
+  return (
+    <View style={st.tabWrap}>
+      <MiniPlayer navigation={navigation} />
+      <View style={st.tabBar}>
+        {state.routes.map((route: any, index: number) => {
+          const active = state.index === index;
+          return (
+            <Pressable
+              key={route.key}
+              style={st.tabItem}
+              onPress={() => {
+                buzz();
+                navigation.navigate(route.name);
+              }}
+            >
+              {active ? (
+                <LinearGradient
+                  colors={[C.pink, C.violet]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={st.tabIconOn}
+                >
+                  <Ionicons name={icons[route.name]} size={19} color={C.white} />
+                </LinearGradient>
+              ) : (
+                <Ionicons name={`${icons[route.name]}-outline` as any} size={21} color={C.muted} />
+              )}
+              <Text style={[st.tabLabel, active && st.tabLabelOn]}>{route.name}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+const Stack = createNativeStackNavigator();
+const Tabs = createBottomTabNavigator();
+
 function TabNav() {
   return (
     <Tabs.Navigator
-      tabBar={(props) => <LuxuryTabBar {...props} />}
+      tabBar={(props) => <DollTabBar {...props} />}
       screenOptions={{ headerShown: false }}
     >
       <Tabs.Screen name="Accueil" component={Home} />
-      <Tabs.Screen name="Catalogue" component={Catalogue} />
-      <Tabs.Screen name="Favoris" component={Favorites} />
-      <Tabs.Screen name="Enchères" component={Auctions} />
-      <Tabs.Screen name="Compte" component={Account} />
+      <Tabs.Screen name="Sons" component={Sons} />
+      <Tabs.Screen name="Live" component={Live} />
+      <Tabs.Screen name="Galerie" component={Galerie} />
+      <Tabs.Screen name="Contact" component={Contact} />
     </Tabs.Navigator>
   );
 }
-function MobileExperience({ value }: any) {
+
+function AppShell({ value }: any) {
   return (
     <SafeAreaProvider style={{ flex: 1 }}>
-      <Shop.Provider value={value}>
+      <Player.Provider value={value}>
         <NavigationContainer
           theme={{
             ...DefaultTheme,
-            colors: { ...DefaultTheme.colors, background: C.cream },
+            colors: { ...DefaultTheme.colors, background: C.paper },
           }}
         >
           <Stack.Navigator
-            screenOptions={{
-              headerShown: false,
-              animation: "slide_from_right",
-            }}
+            screenOptions={{ headerShown: false, animation: "slide_from_right" }}
           >
             <Stack.Screen name="Tabs" component={TabNav} />
-            <Stack.Screen name="Product" component={Product} />
-            <Stack.Screen name="Search" component={Search} />
             <Stack.Screen
-              name="Cart"
-              component={Cart}
-              options={{
-                presentation: "modal",
-                animation: "slide_from_bottom",
-              }}
-            />
-            <Stack.Screen
-              name="Login"
-              component={Login}
-              options={{
-                presentation: "fullScreenModal",
-                animation: "fade_from_bottom",
-              }}
+              name="NowPlaying"
+              component={NowPlaying}
+              options={{ presentation: "modal", animation: "slide_from_bottom" }}
             />
           </Stack.Navigator>
         </NavigationContainer>
-      </Shop.Provider>
+      </Player.Provider>
     </SafeAreaProvider>
   );
 }
+
 function WebStatusBar() {
   return (
-    <View style={s.webStatus}>
-      <Text style={s.webTime}>9:41</Text>
-      <View style={s.webSignals}>
+    <View style={st.webStatus}>
+      <Text style={st.webTime}>9:41</Text>
+      <View style={st.webSignals}>
         <Ionicons name="cellular" size={13} color={C.ink} />
         <Ionicons name="wifi" size={13} color={C.ink} />
         <Ionicons name="battery-full" size={15} color={C.ink} />
@@ -1038,668 +1168,551 @@ function WebStatusBar() {
     </View>
   );
 }
+
 export default function App() {
-  const { width, height } = useWindowDimensions(),
-    [favorites, setFav] = useState(new Set<string>()),
-    [cart, setCart] = useState<Product[]>([]);
-  const value = useMemo(
-    () => ({
-      favorites,
-      toggle: (id: string) =>
-        setFav((x) => {
-          const n = new Set(x);
-          n.has(id) ? n.delete(id) : n.add(id);
-          return n;
+  const { width, height } = useWindowDimensions();
+  const [current, setCurrent] = useState<Track | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [liked, setLiked] = useState(new Set<string>());
+
+  // progression simulée du lecteur
+  useEffect(() => {
+    if (!playing || !current) return;
+    const total = dur(current.length);
+    const id = setInterval(() => {
+      setProgress((p) => {
+        const nextP = p + 1 / total;
+        return nextP >= 1 ? 0 : nextP;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [playing, current]);
+
+  const value = useMemo<PlayerState>(() => {
+    const index = () => TRACKS.findIndex((t) => t.id === current?.id);
+    return {
+      current,
+      playing,
+      progress,
+      liked,
+      play: (t: Track) => {
+        setCurrent(t);
+        setProgress(0);
+        setPlaying(true);
+      },
+      toggle: () => setPlaying((p) => !p),
+      next: () => {
+        const i = index();
+        const n = TRACKS[(i + 1 + TRACKS.length) % TRACKS.length];
+        setCurrent(n);
+        setProgress(0);
+        setPlaying(true);
+      },
+      prev: () => {
+        const i = index();
+        const n = TRACKS[(i - 1 + TRACKS.length) % TRACKS.length];
+        setCurrent(n);
+        setProgress(0);
+        setPlaying(true);
+      },
+      open: () => {},
+      like: (id: string) =>
+        setLiked((x) => {
+          const s = new Set(x);
+          s.has(id) ? s.delete(id) : s.add(id);
+          return s;
         }),
-      cart,
-      add: (p: Product) =>
-        setCart((x) => (x.some((i) => i.id === p.id) ? x : [...x, p])),
-    }),
-    [favorites, cart],
-  );
+    };
+  }, [current, playing, progress, liked]);
+
   const framed = Platform.OS === "web" && width > 620;
-  if (!framed) return <MobileExperience value={value} />;
+  if (!framed) return <AppShell value={value} />;
   return (
-    <View style={s.webStage}>
-      <View style={[s.phoneFrame, { height: Math.min(height - 40, 900) }]}>
+    <View style={st.webStage}>
+      <View style={[st.phoneFrame, { height: Math.min(height - 40, 900) }]}>
         <WebStatusBar />
-        <View style={s.phoneScreen}>
-          <MobileExperience value={value} />
+        <View style={st.phoneScreen}>
+          <AppShell value={value} />
         </View>
-        <View style={s.homeIndicator} />
+        <View style={st.homeIndicator} />
       </View>
     </View>
   );
 }
 
-const s = StyleSheet.create({
-  safe: {
-    flex: 1,
-    width: "100%",
-    maxWidth: "100%",
-    overflow: "hidden",
-    backgroundColor: C.cream,
-  },
-  header: {
-    height: 56,
-    paddingHorizontal: 20,
-    backgroundColor: C.paper,
+/* -------------------------------- Styles --------------------------------- */
+
+const st = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: C.paper },
+
+  /* top bar / logo */
+  topBar: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    borderBottomWidth: 1,
-    borderColor: C.line,
+    paddingHorizontal: 18,
+    paddingTop: 8,
+    paddingBottom: 12,
   },
-  wordmark: { fontFamily: "serif", fontSize: 16, letterSpacing: 2.4 },
-  badge: {
-    position: "absolute",
-    right: -7,
-    top: -7,
-    minWidth: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: C.gold,
+  topKicker: { fontSize: 10, fontWeight: "800", color: C.pink, letterSpacing: 2 },
+  topTitle: { fontSize: 24, fontWeight: "900", color: C.ink, letterSpacing: -0.5 },
+  logoDot: { width: 26, height: 26, borderRadius: 13, overflow: "hidden" },
+  logoText: { fontSize: 20, fontWeight: "900", color: C.ink, letterSpacing: 2 },
+  igBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: C.violet,
   },
-  badgeText: { color: C.white, fontSize: 10, fontWeight: "700" },
-  hero: { height: 560, justifyContent: "flex-end", backgroundColor: C.ink },
-  heroShade: {
-    height: "100%",
-    justifyContent: "flex-end",
-    padding: 24,
-    paddingBottom: 32,
-  },
-  heroTag: {
-    alignSelf: "flex-start",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,.45)",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    marginBottom: 12,
-  },
-  heroTagText: {
-    fontSize: 9,
-    color: C.white,
-    letterSpacing: 1.7,
-    fontWeight: "700",
-  },
-  kickerLight: {
-    fontSize: 10,
-    letterSpacing: 2.5,
-    color: "#e2c38f",
-    fontWeight: "700",
-    marginBottom: 10,
-  },
-  heroTitle: {
-    fontFamily: "serif",
-    fontSize: 40,
-    lineHeight: 46,
-    color: C.white,
-    marginBottom: 10,
-  },
-  heroSub: {
-    fontSize: 13,
-    lineHeight: 20,
-    color: "rgba(255,255,255,.78)",
-    maxWidth: 310,
-    marginBottom: 22,
-  },
-  heroActions: { flexDirection: "row", gap: 10 },
-  goldBtn: {
-    backgroundColor: C.gold,
-    paddingHorizontal: 24,
-    paddingVertical: 15,
-  },
-  ghostBtn: {
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,.65)",
-    paddingHorizontal: 24,
-    paddingVertical: 15,
-  },
-  ghostText: {
-    color: C.white,
-    fontSize: 11,
-    fontWeight: "800",
-    letterSpacing: 1.2,
-  },
-  btnText: {
-    color: C.white,
-    fontSize: 11,
-    fontWeight: "800",
-    letterSpacing: 1.2,
-  },
-  storyWrap: { backgroundColor: C.paper, paddingTop: 24, paddingBottom: 19 },
-  storyHeading: { fontFamily: "serif", fontSize: 23, marginLeft: 20 },
-  storyRow: { paddingHorizontal: 18, gap: 15, marginTop: 16 },
-  story: { width: 72, alignItems: "center" },
-  storyRing: { width: 67, height: 67, borderRadius: 34, padding: 2.5 },
-  storyImg: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 32,
-    borderWidth: 2,
-    borderColor: C.paper,
-  },
-  storyLabel: {
-    fontSize: 10,
-    lineHeight: 13,
-    textAlign: "center",
-    color: C.ink,
-    marginTop: 7,
-  },
-  exclusive: { backgroundColor: C.ink, padding: 28, alignItems: "center" },
-  lockCircle: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    borderWidth: 1,
-    borderColor: "rgba(189,149,90,.5)",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 14,
-  },
-  kicker: {
-    fontSize: 10,
-    letterSpacing: 2.2,
-    color: C.gold,
-    fontWeight: "800",
-    marginBottom: 8,
-  },
-  between: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  sectionTitle: { fontFamily: "serif", fontSize: 23 },
-  timer: { color: C.gold, fontWeight: "700" },
-  body: { fontSize: 14, lineHeight: 21, color: C.muted, marginTop: 10 },
-  countdown: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginTop: 24,
-    marginBottom: 22,
-  },
-  countUnit: { alignItems: "center", minWidth: 56 },
-  countNumber: {
-    fontFamily: "serif",
-    fontSize: 35,
-    color: C.gold,
-    fontVariant: ["tabular-nums"],
-  },
-  countLabel: { fontSize: 7, letterSpacing: 1.2, color: "#777", marginTop: 3 },
-  countSep: {
-    fontFamily: "serif",
-    fontSize: 31,
-    color: "rgba(189,149,90,.4)",
-    marginHorizontal: 3,
-  },
-  exclusiveBtn: {
-    borderWidth: 1,
-    borderColor: C.gold,
-    paddingHorizontal: 22,
-    paddingVertical: 13,
-  },
-  exclusiveBtnText: {
-    fontSize: 10,
-    letterSpacing: 1.4,
-    color: C.gold,
-    fontWeight: "800",
-  },
-  section: {
-    paddingTop: 30,
-    paddingLeft: 20,
-    paddingBottom: 30,
-    borderBottomWidth: 1,
-    borderColor: C.line,
-  },
-  link: { fontSize: 12, color: C.muted, marginRight: 20 },
-  seeAll: {
-    marginRight: 20,
+
+  /* hero */
+  hero: { paddingHorizontal: 18 },
+  heroImg: { height: 430, borderRadius: 30, overflow: "hidden", justifyContent: "space-between" },
+  heroTop: { flexDirection: "row", padding: 16 },
+  livePill: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "#eee4d6",
-    borderRadius: 18,
-    paddingHorizontal: 13,
-    paddingVertical: 8,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
   },
-  seeAllText: {
-    fontSize: 10,
-    color: C.ink,
-    fontWeight: "800",
-    letterSpacing: 0.5,
+  liveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: C.cyan },
+  livePillText: { color: C.white, fontSize: 11, fontWeight: "900", letterSpacing: 2 },
+  heroBottom: { padding: 20 },
+  heroName: { color: C.white, fontSize: 52, fontWeight: "900", letterSpacing: -1 },
+  heroTagline: { color: "rgba(255,255,255,0.92)", fontSize: 13, marginTop: 4, marginBottom: 16, fontWeight: "600" },
+  heroBtns: { flexDirection: "row", alignItems: "center", gap: 10 },
+  heroGhost: {
+    paddingHorizontal: 18,
+    paddingVertical: 13,
+    borderRadius: 26,
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.7)",
   },
-  marquee: { backgroundColor: C.gold, paddingVertical: 11, overflow: "hidden" },
-  marqueeText: {
-    fontSize: 9,
-    letterSpacing: 1.7,
-    color: C.white,
-    fontWeight: "800",
-    textAlign: "center",
+  heroGhostText: { color: C.white, fontWeight: "800", fontSize: 13 },
+
+  /* buttons */
+  glowWrap: {
+    shadowColor: C.violet,
+    shadowOpacity: 0.4,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
   },
-  card: {
-    width: 168,
-    marginTop: 16,
-    backgroundColor: C.paper,
-    borderRadius: 18,
-    paddingBottom: 14,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#ece3d6",
-    shadowColor: "#382d1f",
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 5 },
-    elevation: 3,
-  },
-  wide: { flex: 1, width: "auto", minWidth: 0 },
-  cardImg: {
-    width: 168,
-    height: 224,
-    backgroundColor: C.line,
-    borderTopLeftRadius: 17,
-    borderTopRightRadius: 17,
-  },
-  wideImg: { width: "100%", height: 224 },
-  heart: {
-    position: "absolute",
-    right: 9,
-    top: 9,
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: "rgba(255,253,249,.92)",
+  glowBtn: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 26,
   },
-  pill: {
-    position: "absolute",
-    left: 8,
-    bottom: 8,
-    backgroundColor: "rgba(17,14,11,.84)",
-    borderRadius: 12,
-    padding: 6,
+  glowText: { color: C.white, fontWeight: "900", fontSize: 14, letterSpacing: 0.3 },
+  softBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 24,
+    backgroundColor: C.lilac,
+    borderWidth: 1,
+    borderColor: C.line,
+  },
+  softBtnText: { color: C.violet, fontWeight: "800", fontSize: 13.5 },
+
+  /* stats */
+  stats: {
+    flexDirection: "row",
+    marginHorizontal: 18,
+    marginTop: 18,
+    backgroundColor: C.cloud,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: C.line,
+    paddingVertical: 16,
+  },
+  stat: { flex: 1, alignItems: "center" },
+  statNum: { fontSize: 22, fontWeight: "900", color: C.ink },
+  statLabel: { fontSize: 11, color: C.muted, marginTop: 2, fontWeight: "600" },
+
+  /* sections */
+  sectionHead: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    paddingHorizontal: 18,
+    marginTop: 26,
+    marginBottom: 14,
+  },
+  sectionLabel: { fontSize: 10, fontWeight: "900", color: C.pink, letterSpacing: 2 },
+  sectionTitle: { fontSize: 21, fontWeight: "900", color: C.ink, marginTop: 2, letterSpacing: -0.3 },
+  sectionAction: { fontSize: 12.5, fontWeight: "800", color: C.violet },
+
+  /* feature card */
+  featureCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    marginHorizontal: 18,
+    padding: 12,
+    borderRadius: 24,
+    backgroundColor: C.cloud,
+    borderWidth: 1,
+    borderColor: C.line,
+    overflow: "hidden",
+  },
+  featureGlow: { position: "absolute", right: -40, top: -40, width: 140, height: 140, borderRadius: 70, opacity: 0.5 },
+  featureArt: { width: 92, height: 92, borderRadius: 18 },
+  featureKind: { fontSize: 10.5, fontWeight: "800", color: C.pink, letterSpacing: 1 },
+  featureTitle: { fontSize: 19, fontWeight: "900", color: C.ink, marginTop: 2 },
+  featureMeta: { fontSize: 12, color: C.muted, marginTop: 2, fontWeight: "600" },
+  featurePlay: {
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
+    alignSelf: "flex-start",
+    marginTop: 8,
+    backgroundColor: C.violet,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
   },
-  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.red },
-  pillText: { color: C.white, fontSize: 10, fontWeight: "700" },
-  brand: {
-    fontSize: 9,
-    letterSpacing: 1.4,
-    color: C.gold,
-    fontWeight: "800",
-    marginTop: 11,
-    marginHorizontal: 12,
-  },
-  productTitle: {
-    fontFamily: "serif",
-    fontSize: 15,
-    marginTop: 4,
-    marginHorizontal: 12,
-  },
-  price: {
-    fontSize: 13,
-    fontWeight: "700",
-    marginTop: 7,
-    marginHorizontal: 12,
-  },
-  moreCard: {
-    width: 150,
-    height: 306,
-    marginTop: 16,
+  featurePlayText: { color: C.white, fontWeight: "800", fontSize: 12 },
+
+  /* track rows */
+  list: { paddingHorizontal: 18, gap: 10 },
+  trackRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: C.cloud,
     borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: C.gold,
-    backgroundColor: "#f0e7d9",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 18,
-  },
-  moreIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: C.paper,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 18,
-  },
-  moreTitle: {
-    fontFamily: "serif",
-    fontSize: 19,
-    lineHeight: 24,
-    textAlign: "center",
-    color: C.ink,
-  },
-  moreCount: {
-    fontSize: 9,
-    letterSpacing: 1.2,
-    color: C.gold,
-    fontWeight: "800",
-    marginTop: 10,
-  },
-  softBanner: {
-    marginHorizontal: 18,
-    marginVertical: 10,
-    borderRadius: 18,
-    backgroundColor: "#e9dece",
-    padding: 18,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 13,
-  },
-  softTitle: { fontFamily: "serif", fontSize: 19, color: C.ink },
-  softText: { fontSize: 11, color: C.muted, marginTop: 3 },
-  editorial: { backgroundColor: "#28231d", padding: 24 },
-  editorialTitle: {
-    fontFamily: "serif",
-    fontSize: 29,
-    lineHeight: 35,
-    color: C.white,
-    maxWidth: 300,
-  },
-  editorialText: {
-    fontSize: 13,
-    lineHeight: 20,
-    color: "#aaa",
-    marginTop: 10,
-    marginBottom: 20,
-  },
-  editorialGrid: { flexDirection: "row", gap: 10 },
-  editorialCard: { flex: 1 },
-  editorialImg: { width: "100%", height: 170 },
-  editorialCardTitle: {
-    fontFamily: "serif",
-    fontSize: 15,
-    lineHeight: 19,
-    color: C.white,
-    marginTop: 9,
-  },
-  trustBlock: { backgroundColor: C.ink, padding: 22, gap: 14 },
-  trust: { flexDirection: "row", alignItems: "center", gap: 10 },
-  trustText: { fontSize: 12, fontWeight: "600" },
-  search: {
-    margin: 16,
-    marginBottom: 8,
-    height: 48,
+    padding: 8,
     borderWidth: 1,
     borderColor: C.line,
-    backgroundColor: C.paper,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 14,
-    gap: 10,
   },
-  searchInput: { flex: 1, fontSize: 14 },
-  filterRail: { height: 56, width: "100%" },
-  chips: { paddingHorizontal: 16, gap: 8, height: 56, alignItems: "center" },
-  chip: {
-    height: 34,
-    paddingHorizontal: 15,
-    borderRadius: 17,
-    borderWidth: 1,
-    borderColor: C.line,
-    justifyContent: "center",
-  },
-  chipOn: { backgroundColor: C.ink },
-  chipText: { fontSize: 12, color: C.muted },
-  catalogList: { width: "100%", maxWidth: "100%" },
-  catalogColumns: { gap: 12, justifyContent: "space-between", width: "100%" },
-  grid: { paddingHorizontal: 16, paddingBottom: 24, width: "100%" },
-  resultHead: {
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 14,
-  },
-  result: { fontFamily: "serif", fontSize: 18 },
-  sort: { fontSize: 11, color: C.muted },
-  empty: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 40,
-  },
-  emptyTitle: {
-    fontFamily: "serif",
-    fontSize: 25,
-    textAlign: "center",
-    marginTop: 18,
-    marginBottom: 9,
-  },
-  center: { fontSize: 14, lineHeight: 21, color: C.muted, textAlign: "center" },
-  outline: { borderWidth: 1, borderColor: C.ink, padding: 14, marginTop: 24 },
-  outlineText: { fontSize: 11, fontWeight: "800", letterSpacing: 1 },
-  bidCard: {
-    backgroundColor: C.paper,
-    padding: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-  },
-  bidImg: { width: 88, height: 110 },
-  bidTitle: { fontFamily: "serif", fontSize: 16, marginTop: 4 },
-  bidTime: { fontSize: 11, color: C.red, marginTop: 8 },
-  pageTitle: { fontFamily: "serif", fontSize: 29 },
-  profile: { alignItems: "center", paddingVertical: 20, paddingBottom: 30 },
-  avatar: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    borderWidth: 1,
-    borderColor: C.gold,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarText: { fontFamily: "serif", fontSize: 22, color: C.gold },
-  profileTitle: { fontFamily: "serif", fontSize: 28, marginTop: 16 },
-  blackBtn: {
-    width: "100%",
-    height: 50,
-    backgroundColor: C.ink,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 22,
-  },
-  menu: {
-    height: 58,
-    borderTopWidth: 1,
-    borderColor: C.line,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 13,
-  },
-  menuText: { flex: 1, fontSize: 14 },
-  detailImg: { width: "100%", height: 470 },
-  back: {
-    position: "absolute",
-    top: 16,
-    left: 16,
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: C.white,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  detailHeart: {
-    position: "absolute",
-    top: 16,
-    right: 16,
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: C.white,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  detailBody: { padding: 22 },
-  certified: { fontSize: 10, color: C.gold, fontWeight: "800" },
-  detailTitle: { fontFamily: "serif", fontSize: 28, marginTop: 8 },
-  priceBig: { fontFamily: "serif", fontSize: 24, marginTop: 14 },
-  bidBox: {
-    backgroundColor: "#eee3d2",
-    padding: 14,
-    marginTop: 16,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  bidLabel: { fontSize: 10, fontWeight: "800" },
-  bidCount: { fontSize: 11, color: C.red, fontWeight: "700" },
-  info: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderColor: C.line,
-  },
-  infoLabel: { fontSize: 12, color: C.muted },
-  infoValue: { fontSize: 12, fontWeight: "600" },
-  description: {
-    fontSize: 14,
-    lineHeight: 22,
-    color: C.muted,
-    marginVertical: 20,
-  },
-  promise: { backgroundColor: C.paper, padding: 16, gap: 12 },
-  bottom: {
-    backgroundColor: C.paper,
-    padding: 12,
-    paddingHorizontal: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 18,
-  },
-  actionLabel: { fontSize: 9, color: C.muted },
-  actionPrice: { fontSize: 17, fontWeight: "800" },
-  blackFlex: {
-    flex: 1,
-    height: 50,
-    backgroundColor: C.ink,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  searchPage: {
-    height: 64,
-    paddingHorizontal: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 15,
-  },
-  searchPageInput: { flex: 1, fontFamily: "serif", fontSize: 21 },
-  searchResult: {
-    flexDirection: "row",
-    gap: 14,
-    alignItems: "center",
-    backgroundColor: C.paper,
-    padding: 10,
-  },
-  thumb: { width: 72, height: 88 },
-  modalHead: {
-    height: 58,
-    paddingHorizontal: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  cartImg: { width: 82, height: 102 },
-  checkout: { padding: 20, backgroundColor: C.paper },
-  login: {
-    flex: 1,
-    backgroundColor: C.ink,
-    padding: 28,
-    justifyContent: "center",
-  },
-  loginClose: { position: "absolute", right: 24, top: 60 },
-  logo: {
-    fontFamily: "serif",
-    fontSize: 40,
-    color: C.gold,
-    textAlign: "center",
-    marginBottom: 36,
-  },
-  loginTitle: {
-    fontFamily: "serif",
-    fontSize: 35,
-    lineHeight: 43,
-    color: C.white,
-    textAlign: "center",
-    marginBottom: 38,
-  },
-  loginInput: {
-    height: 54,
-    borderBottomWidth: 1,
-    borderColor: "#665b4e",
-    color: C.white,
-  },
-  goldWide: {
-    height: 52,
-    backgroundColor: C.gold,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 22,
-  },
-  loginLegal: {
-    fontSize: 10,
-    color: "#888",
-    textAlign: "center",
-    marginTop: 22,
-  },
-  luxuryBar: {
-    height: 78,
-    backgroundColor: C.paper,
-    borderTopWidth: 1,
-    borderColor: C.line,
-    flexDirection: "row",
-    paddingHorizontal: 8,
-    paddingTop: 6,
-    paddingBottom: 8,
-  },
-  luxuryItem: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-  },
-  luxuryItemOn: { backgroundColor: "#f1e9dc", borderRadius: 18 },
-  navIcon: { height: 26, alignItems: "center", justifyContent: "center" },
-  navIconOn: { transform: [{ translateY: -1 }] },
-  navLabel: { fontSize: 8.5, color: C.muted, marginTop: 2, fontWeight: "600" },
-  navLabelOn: { color: C.ink, fontWeight: "800" },
-  activeLine: {
+  trackRowOn: { borderColor: C.violet, backgroundColor: C.lilac },
+  trackArtWrap: { width: 52, height: 52, borderRadius: 14, overflow: "hidden" },
+  trackArt: { width: "100%", height: "100%" },
+  trackArtVeil: {
     position: "absolute",
     top: 0,
-    width: 18,
-    height: 2,
-    borderRadius: 1,
-    backgroundColor: C.gold,
-  },
-  webStage: {
-    flex: 1,
-    minHeight: "100%",
-    backgroundColor: "#d8cdbc",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(27,16,48,0.32)",
     alignItems: "center",
     justifyContent: "center",
-    padding: 20,
   },
-  phoneFrame: {
-    width: 430,
-    maxWidth: "100%",
+  trackTitle: { fontSize: 15, fontWeight: "800", color: C.ink },
+  trackMeta: { fontSize: 11.5, color: C.muted, marginTop: 2, fontWeight: "600" },
+  trackLen: { fontSize: 12, color: C.muted, fontWeight: "700", marginRight: 4 },
+  freshTag: { backgroundColor: C.cyan, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 10 },
+  freshText: { fontSize: 8.5, fontWeight: "900", color: C.ink, letterSpacing: 1 },
+
+  /* filters / chips */
+  filterRow: { paddingVertical: 6 },
+  chip: {
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 20,
+    backgroundColor: C.cloud,
+    borderWidth: 1,
+    borderColor: C.line,
+  },
+  chipOn: { backgroundColor: C.ink, borderColor: C.ink },
+  chipText: { fontSize: 13, fontWeight: "800", color: C.muted },
+  chipTextOn: { color: C.white },
+
+  shuffle: { marginHorizontal: 18, marginTop: 12, borderRadius: 26, overflow: "hidden" },
+  shuffleGrad: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 15,
+  },
+  shuffleText: { color: C.white, fontWeight: "900", fontSize: 14.5, letterSpacing: 0.4 },
+
+  streamCard: {
+    margin: 18,
+    marginTop: 24,
+    padding: 22,
+    borderRadius: 24,
+    backgroundColor: C.petal,
+    borderWidth: 1,
+    borderColor: C.line,
+    alignItems: "center",
+    gap: 6,
+  },
+  streamTitle: { fontSize: 18, fontWeight: "900", color: C.ink },
+  streamSub: { fontSize: 13, color: C.muted, textAlign: "center", marginBottom: 8, fontWeight: "600" },
+
+  /* mixes */
+  mixCard: { width: 210 },
+  mixImg: { height: 250, borderRadius: 22, overflow: "hidden", justifyContent: "space-between" },
+  mixPlay: {
+    margin: 12,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "rgba(255,255,255,0.22)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mixInfo: { padding: 14 },
+  mixTitle: { color: C.white, fontSize: 15, fontWeight: "900" },
+  mixMeta: { color: "rgba(255,255,255,0.85)", fontSize: 11, marginTop: 3, fontWeight: "600" },
+
+  /* shows */
+  liveHero: { height: 190, margin: 18, borderRadius: 26, overflow: "hidden", justifyContent: "flex-end", padding: 20 },
+  liveHeroKicker: { color: C.white, fontSize: 11, fontWeight: "900", letterSpacing: 2 },
+  liveHeroTitle: { color: C.white, fontSize: 26, fontWeight: "900", marginTop: 4, lineHeight: 30 },
+  showRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    backgroundColor: C.cloud,
+    borderRadius: 20,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: C.line,
+    marginBottom: 10,
+  },
+  showRowFirst: { borderColor: C.violet, backgroundColor: C.lilac },
+  showDate: {
+    width: 54,
+    height: 54,
+    borderRadius: 16,
     backgroundColor: C.ink,
-    borderRadius: 42,
-    borderWidth: 8,
-    borderColor: "#17140f",
-    overflow: "hidden",
-    shadowColor: "#17100a",
-    shadowOpacity: 0.34,
-    shadowRadius: 35,
-    shadowOffset: { width: 0, height: 18 },
-    elevation: 18,
+    alignItems: "center",
+    justifyContent: "center",
   },
+  showDay: { color: C.white, fontSize: 19, fontWeight: "900", lineHeight: 20 },
+  showMonth: { color: C.cyan, fontSize: 10, fontWeight: "800", letterSpacing: 1 },
+  showCity: { fontSize: 16, fontWeight: "900", color: C.ink },
+  showCountry: { fontSize: 13, color: C.muted, fontWeight: "700" },
+  showVenue: { fontSize: 12.5, color: C.muted, marginTop: 2, fontWeight: "600" },
+  ticket: {
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 18,
+    backgroundColor: C.violet,
+  },
+  ticketOff: { backgroundColor: C.line },
+  ticketSoon: { backgroundColor: C.petal },
+  ticketText: { fontSize: 12, fontWeight: "900", color: C.white },
+
+  bookCard: {
+    margin: 18,
+    marginTop: 22,
+    padding: 24,
+    borderRadius: 26,
+    backgroundColor: C.ink,
+    alignItems: "center",
+    gap: 8,
+  },
+  bookIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: C.violet,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
+  bookTitle: { fontSize: 20, fontWeight: "900", color: C.white },
+  bookSub: { fontSize: 13, color: C.soft, textAlign: "center", marginBottom: 10, fontWeight: "600" },
+  bookMail: { fontSize: 12, color: C.cyan, marginTop: 10, fontWeight: "700" },
+
+  /* gallery */
+  masonry: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    paddingHorizontal: 12,
+    paddingTop: 6,
+    gap: 12,
+    justifyContent: "space-between",
+  },
+  tile: { width: "47%", borderRadius: 20, overflow: "hidden", backgroundColor: C.lilac },
+  tileTall: { height: 230 },
+  tileShort: { height: 170 },
+  tileImg: { width: "100%", height: "100%" },
+
+  /* contact */
+  contactHero: { alignItems: "center", paddingTop: 8, paddingBottom: 6 },
+  contactAvatar: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  contactInitial: { fontSize: 40, fontWeight: "900", color: C.white },
+  contactName: { fontSize: 26, fontWeight: "900", color: C.ink, marginTop: 12, letterSpacing: 1 },
+  contactRole: { fontSize: 13, color: C.muted, marginTop: 2, fontWeight: "700" },
+  socialRow: { flexDirection: "row", gap: 12, marginTop: 14 },
+  social: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: C.lilac,
+    borderWidth: 1,
+    borderColor: C.line,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  form: { paddingHorizontal: 18, paddingTop: 18 },
+  formLabel: { fontSize: 12, fontWeight: "800", color: C.ink, marginBottom: 6, marginTop: 12 },
+  input: {
+    backgroundColor: C.cloud,
+    borderWidth: 1,
+    borderColor: C.line,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 13,
+    fontSize: 14,
+    color: C.ink,
+  },
+  inputArea: { height: 110, textAlignVertical: "top", paddingTop: 13 },
+  formMail: { fontSize: 12, color: C.muted, textAlign: "center", marginTop: 14, fontWeight: "700" },
+
+  /* now playing */
+  npBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 18,
+    paddingTop: 6,
+  },
+  npClose: { width: 40, height: 40, alignItems: "center", justifyContent: "center" },
+  npBarText: { color: C.white, fontSize: 11, fontWeight: "900", letterSpacing: 2 },
+  npArtWrap: { alignItems: "center", marginTop: 20 },
+  npDisc: {
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 6,
+    borderColor: "rgba(255,255,255,0.3)",
+  },
+  npArt: { width: "100%", height: "100%" },
+  npHole: {
+    position: "absolute",
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: C.paper,
+    borderWidth: 4,
+    borderColor: "rgba(27,16,48,0.2)",
+  },
+  npInfo: { alignItems: "center", marginTop: 30 },
+  npTitle: { color: C.white, fontSize: 26, fontWeight: "900", letterSpacing: -0.3, textAlign: "center", paddingHorizontal: 20 },
+  npArtist: { color: "rgba(255,255,255,0.85)", fontSize: 14, marginTop: 6, fontWeight: "700" },
+  npProgress: { paddingHorizontal: 30, marginTop: 26 },
+  npTrack: { height: 5, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.28)", justifyContent: "center" },
+  npFill: { height: 5, borderRadius: 3, backgroundColor: C.white },
+  npKnob: {
+    position: "absolute",
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: C.white,
+    marginLeft: -7,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  npTimes: { flexDirection: "row", justifyContent: "space-between", marginTop: 8 },
+  npTime: { color: "rgba(255,255,255,0.85)", fontSize: 11, fontWeight: "700" },
+  npControls: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 34,
+    marginTop: 34,
+  },
+  npPlay: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    backgroundColor: C.white,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+  },
+  npStream: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginTop: "auto",
+    marginBottom: 18,
+    marginHorizontal: 30,
+    paddingVertical: 14,
+    borderRadius: 24,
+    backgroundColor: "rgba(255,255,255,0.16)",
+  },
+  npStreamText: { color: C.white, fontWeight: "800", fontSize: 13 },
+
+  /* mini player */
+  mini: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginHorizontal: 12,
+    marginBottom: 8,
+    padding: 8,
+    borderRadius: 18,
+    overflow: "hidden",
+  },
+  miniArt: { width: 40, height: 40, borderRadius: 12 },
+  miniTitle: { color: C.white, fontSize: 13.5, fontWeight: "900" },
+  miniArtist: { color: "rgba(255,255,255,0.85)", fontSize: 11, fontWeight: "700" },
+  miniPlay: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.22)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  /* tab bar */
+  tabWrap: { backgroundColor: "transparent" },
+  tabBar: {
+    flexDirection: "row",
+    backgroundColor: C.cloud,
+    borderTopWidth: 1,
+    borderTopColor: C.line,
+    paddingTop: 8,
+    paddingBottom: 22,
+    paddingHorizontal: 6,
+  },
+  tabItem: { flex: 1, alignItems: "center", gap: 3 },
+  tabIconOn: {
+    width: 38,
+    height: 30,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tabLabel: { fontSize: 9.5, color: C.muted, fontWeight: "700" },
+  tabLabelOn: { color: C.violet, fontWeight: "900" },
+
+  /* web frame */
   webStatus: {
     height: 28,
     backgroundColor: C.paper,
@@ -1710,12 +1723,29 @@ const s = StyleSheet.create({
   },
   webTime: { fontSize: 10, fontWeight: "800", color: C.ink },
   webSignals: { flexDirection: "row", alignItems: "center", gap: 5 },
-  phoneScreen: {
+  webStage: {
     flex: 1,
-    width: "100%",
-    overflow: "hidden",
-    backgroundColor: C.cream,
+    minHeight: "100%",
+    backgroundColor: "#e9defb",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
   },
+  phoneFrame: {
+    width: 430,
+    maxWidth: "100%",
+    backgroundColor: C.ink,
+    borderRadius: 42,
+    borderWidth: 8,
+    borderColor: "#1b1030",
+    overflow: "hidden",
+    shadowColor: C.violet,
+    shadowOpacity: 0.34,
+    shadowRadius: 35,
+    shadowOffset: { width: 0, height: 18 },
+    elevation: 18,
+  },
+  phoneScreen: { flex: 1, width: "100%", overflow: "hidden", backgroundColor: C.paper },
   homeIndicator: {
     position: "absolute",
     bottom: 5,
@@ -1724,6 +1754,6 @@ const s = StyleSheet.create({
     width: 106,
     height: 4,
     borderRadius: 2,
-    backgroundColor: "rgba(23,20,15,.78)",
+    backgroundColor: "rgba(27,16,48,0.6)",
   },
 });

@@ -1,19 +1,22 @@
-# Magali Berdah — application mobile
+# ASHLEY — site & application officiels
 
-Application Expo/React Native destinée à iOS et Android pour la marketplace Magali Berdah.
+Application Expo / React Native (iOS, Android et preview web) pour l'artiste
+**ASHLEY** — *Techno Doll*, DJ &amp; productrice ([@ashley.musicoff](https://www.instagram.com/ashley.musicoff/)).
+
+Direction artistique : lumineux, chrome hyperpop, énergie techno.
 
 ## Expérience incluse
-- accueil éditorial et ventes exclusives ;
-- catalogue, recherche et filtres ;
-- fiches produits et certificats ;
-- enchères, favoris et panier ;
-- compte, commandes et conciergerie ;
-- identité visuelle et configuration de build iOS/Android.
+- accueil éditorial avec dernière sortie et lecture instantanée ;
+- **Les sons** : discographie complète avec filtres, lecture aléatoire et mini-lecteur global ;
+- lecteur plein écran « en lecture » (vinyle animé, progression, favoris) ;
+- **En live** : dates de tournée et demande de booking ;
+- galerie backstage / club ;
+- contact &amp; booking (formulaire + email direct).
 
 ## Démarrage
 ```bash
 npm install
-npm start
+npm start          # puis « w » pour la preview web
 ```
 
 ## Vérification
@@ -22,11 +25,10 @@ npm run typecheck
 npx expo export --platform all
 ```
 
-## Builds stores
-```bash
-npx eas-cli build --platform all --profile production
-npx eas-cli submit --platform ios
-npx eas-cli submit --platform android
-```
+## Liens
+- Instagram : https://www.instagram.com/ashley.musicoff/
+- Booking : ashley.booking.music@gmail.com
 
-La soumission exige les comptes développeur, les certificats, l’API et le paiement de production. Consultez `STORE_LISTING.md` pour la checklist.
+> Les extraits pointent vers Instagram, où sont publiés les sets et sorties.
+> Remplacez les liens/visuels par les URLs de streaming définitives (Spotify,
+> SoundCloud, Beatport…) dès qu'elles sont disponibles.

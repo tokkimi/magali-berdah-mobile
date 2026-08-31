@@ -1,29 +1,32 @@
 # Fiche App Store et Google Play
 
 ## Nom
-Magali Berdah
+ASHLEY
 
 ## Sous-titre iOS
-Le luxe, en toute confiance
+Techno Doll · sons, sets &amp; dates
 
 ## Description courte Android
-Achetez et enchérissez sur des pièces de luxe sélectionnées et authentifiées.
+L'app officielle d'ASHLEY : écoutez les sons, suivez les dates et bookez.
 
 ## Description
-Découvrez une sélection exigeante de sacs, mode, montres et accessoires de luxe. Suivez les enchères en direct, enregistrez vos favoris et achetez en toute confiance grâce à l’authentification des pièces, au paiement sécurisé et à la livraison suivie.
+Bienvenue dans l'univers d'ASHLEY — *Techno Doll*, DJ et productrice. Écoutez ses
+sons et ses sets, découvrez ses dernières sorties, suivez la tournée en clubs,
+warehouses et open airs, parcourez la galerie backstage et envoyez votre demande
+de booking en un tap.
 
-Fonctionnalités : catalogue, recherche, ventes exclusives, enchères, favoris, panier, suivi des commandes, espace personnel et certificats d’authenticité.
+Fonctionnalités : discographie complète, lecteur audio avec mini-lecteur global,
+lecture aléatoire, agenda des dates live, billetterie, galerie et contact booking.
 
 ## Mots-clés iOS
-luxe,mode,sacs,enchères,seconde main,authentifié,designer,vintage
+techno,dj,musique,électro,rave,set,club,ashley
 
 ## Catégorie
-Shopping
+Musique
 
 ## Prérequis avant soumission
-- URL publique de politique de confidentialité et URL d’assistance ;
+- URL publique de politique de confidentialité et URL d'assistance ;
 - comptes Apple Developer et Google Play Console ;
-- compte marchand et parcours de paiement de production ;
-- API de production, authentification et suppression de compte ;
+- liens de streaming définitifs (Spotify, SoundCloud, Beatport) ;
 - captures iPhone, iPad et Android ;
-- questionnaire de confidentialité et classification d’âge.
+- questionnaire de confidentialité et classification d'âge.
