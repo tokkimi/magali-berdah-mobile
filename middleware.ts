@@ -37,6 +37,22 @@ export function middleware(req: NextRequest) {
     host === '127.0.0.1';
 
   if (isRoot) {
+    // Déploiement mono-tenant : la racine sert directement le site d'ASHLEY,
+    // tout en gardant l'admin, le dashboard et les pages système accessibles.
+    const ASHLEY = 'ashley';
+    const PLATFORM_PREFIXES = [
+      '/dashboard', '/ashley-admin', '/vielusos-admin', '/admin', '/login', '/register',
+      '/onboarding', '/checkout', '/forgot-password', '/reset-password', '/verify-email',
+      '/s', '/domain', '/theme-preview', '/cgv', '/mentions-legales', '/en',
+    ];
+    const p = req.nextUrl.pathname;
+    const isPlatform = PLATFORM_PREFIXES.some((pre) => p === pre || p.startsWith(`${pre}/`));
+    if (!isPlatform) {
+      const url = req.nextUrl.clone();
+      url.pathname = `/s/${ASHLEY}${p === '/' ? '' : p}`;
+      return NextResponse.rewrite(url);
+    }
+
     const language = req.cookies.get('easyasso-language')?.value;
     if (language === 'en' && req.nextUrl.pathname === '/cgv') {
       const url = req.nextUrl.clone();
