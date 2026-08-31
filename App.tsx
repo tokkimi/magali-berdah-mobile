@@ -57,15 +57,14 @@ const C = {
 
 const IG = "https://www.instagram.com/ashley.musicoff/";
 const TIKTOK = "https://www.tiktok.com/@ashley.musicoff";
-const SPOTIFY = "https://open.spotify.com/artist/0JbsjL74YqmrAZuImwy8FZ";
-const SOUNDCLOUD = "https://soundcloud.com/skorm888";
 const LINKTREE = "https://linktr.ee/ashley.musicoff";
-// Liens routés vers le Linktree officiel tant que l'URL directe n'est pas fournie.
+// Liens routés vers le Linktree officiel tant que les URLs directes ne sont pas fournies.
+const SPOTIFY = LINKTREE;
+const SOUNDCLOUD = LINKTREE;
 const APPLE = LINKTREE;
 const YOUTUBE = LINKTREE;
 const BOOKING = "ashley.booking.music@gmail.com";
 const SLOGAN = "Escape the mind, Enter the rave";
-const ALIAS = "SKORM";
 
 type Lib = "fa" | "ion" | "feather";
 type PlatformLink = {
@@ -714,7 +713,7 @@ function Home({ navigation }: any) {
         </View>
 
         {/* PLATEFORMES */}
-        <SectionTitle label="STREAMING" title="Écouter partout" action="SKORM" />
+        <SectionTitle label="STREAMING" title="Écouter partout" />
         <PlatformRow />
         <View style={{ paddingHorizontal: 18, marginTop: 12 }}>
           <GlowButton
@@ -834,7 +833,7 @@ function Sons() {
         <View style={st.streamCard}>
           <Text style={st.streamTitle}>Écouter partout</Text>
           <Text style={st.streamSub}>
-            Sorties &amp; sets d'ASHLEY (alias {ALIAS}) sur toutes les plateformes.
+            Les sorties &amp; sets d'ASHLEY sur toutes les plateformes.
           </Text>
           <View style={{ alignSelf: "stretch" }}>
             <PlatformGrid />
@@ -995,7 +994,6 @@ function Contact() {
             <Text style={st.contactInitial}>A</Text>
           </View>
           <Text style={st.contactName}>ASHLEY</Text>
-          <Text style={st.contactAlias}>aka {ALIAS}</Text>
           <Text style={st.contactRole}>Hard Techno · DJ &amp; Productrice</Text>
           <Text style={st.contactSlogan}>« {SLOGAN} »</Text>
         </View>
@@ -1019,7 +1017,7 @@ function Contact() {
         </Pressable>
 
         {/* Toutes les plateformes */}
-        <SectionTitle label="RETROUVE ASHLEY" title="Sur chaque plateforme" action={ALIAS} />
+        <SectionTitle label="RETROUVE ASHLEY" title="Sur chaque plateforme" />
         <PlatformGrid />
         <View style={{ paddingHorizontal: 18, marginTop: 12 }}>
           <GlowButton label="Tous les liens" icon="link" onPress={() => openURL(LINKTREE)} />
