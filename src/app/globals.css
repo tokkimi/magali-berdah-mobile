@@ -1,0 +1,170 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+
+button, a, input, select, textarea { touch-action: manipulation; }
+
+.touch-target { min-width: 44px; min-height: 44px; }
+
+@media (pointer: coarse) {
+  .btn { min-height: 44px; }
+  .input { min-height: 44px; font-size: 16px; }
+}
+
+.public-header-shell, .public-footer-shell, .contact-block, .public-block-shell { container-type: inline-size; }
+.public-header-desktop { display: flex; }
+.public-header-menu-button, .public-header-dropdown { display: none; }
+.contact-block { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); }
+.contact-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.public-footer-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.public-responsive-gallery { display: grid; gap: .75rem; }
+.public-responsive-cards { display: grid; gap: 1.25rem; }
+.public-responsive-columns { display: grid; gap: 1.5rem; }
+.public-textimage { display: grid; align-items: center; gap: 2rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.public-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.public-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.public-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.public-responsive-gallery > .public-scroll-item { width: 100%; }
+
+.public-horizontal-scroll {
+  display: flex;
+  grid-template-columns: none;
+  gap: 1rem;
+  margin-inline: -1rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding: .25rem 1rem .75rem;
+  scroll-padding-inline: 1rem;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.public-horizontal-scroll > .public-scroll-item {
+  flex: 0 0 min(78vw, 300px);
+  scroll-snap-align: start;
+}
+
+@keyframes easyasso-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.animate-easyasso-marquee {
+  animation: easyasso-marquee 34s linear infinite;
+  will-change: transform;
+}
+
+.animate-easyasso-marquee:hover,
+.animate-easyasso-marquee:focus-within {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-easyasso-marquee { animation: none; }
+}
+.public-responsive-columns.public-horizontal-scroll > .public-scroll-item {
+  border-radius: .75rem;
+  background: rgba(255,255,255,.72);
+  padding: 1rem;
+  box-shadow: inset 0 0 0 1px rgba(17,24,39,.08);
+}
+
+@container (max-width: 640px) {
+  .public-header-desktop { display: none; }
+  .public-header-menu-button { display: flex; }
+  .public-header-dropdown { display: block; }
+  .contact-block, .contact-fields, .public-footer-grid { grid-template-columns: minmax(0, 1fr); }
+  .public-textimage { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+  .public-textimage img { max-height: 260px; }
+  .public-responsive-gallery, .public-responsive-cards, .public-responsive-columns { display: flex; grid-template-columns: none; gap: 1rem; margin-inline: -1rem; overflow-x: auto; overscroll-behavior-x: contain; padding: .25rem 1rem .75rem; scroll-padding-inline: 1rem; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+  .public-responsive-gallery > .public-scroll-item, .public-responsive-cards > .public-scroll-item, .public-responsive-columns > .public-scroll-item { flex: 0 0 min(78vw, 300px); scroll-snap-align: start; }
+  .public-responsive-columns > .public-scroll-item { border-radius: .75rem; background: rgba(255,255,255,.72); padding: 1rem; box-shadow: inset 0 0 0 1px rgba(17,24,39,.08); }
+  .public-footer-grid { gap: 1.5rem; padding-top: 2rem; padding-bottom: 2rem; }
+  .public-footer-bottom { align-items: flex-start; flex-direction: column; gap: .75rem; }
+}
+
+@media (max-width: 640px) {
+  .public-header-desktop { display: none; }
+  .public-header-menu-button { display: flex; }
+  .public-header-dropdown { display: block; }
+  .contact-block, .contact-fields, .public-footer-grid { grid-template-columns: minmax(0, 1fr); }
+  .public-textimage { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+  .public-textimage img { max-height: 260px; }
+  .public-responsive-gallery, .public-responsive-cards, .public-responsive-columns { display: flex; grid-template-columns: none; gap: 1rem; margin-inline: -1rem; overflow-x: auto; overscroll-behavior-x: contain; padding: .25rem 1rem .75rem; scroll-padding-inline: 1rem; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+  .public-responsive-gallery > .public-scroll-item, .public-responsive-cards > .public-scroll-item, .public-responsive-columns > .public-scroll-item { flex: 0 0 min(78vw, 300px); scroll-snap-align: start; }
+  .public-responsive-columns > .public-scroll-item { border-radius: .75rem; background: rgba(255,255,255,.72); padding: 1rem; box-shadow: inset 0 0 0 1px rgba(17,24,39,.08); }
+  .public-footer-bottom { align-items: flex-start; flex-direction: column; }
+}
+
+body {
+  @apply bg-gray-50 text-gray-900 antialiased;
+}
+
+/* Reusable UI primitives */
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50;
+}
+.btn-primary { @apply bg-brand-600 text-white hover:bg-brand-700; }
+.btn-ghost { @apply bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50; }
+.btn-danger { @apply bg-red-600 text-white hover:bg-red-700; }
+.input {
+  @apply w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100;
+}
+.label { @apply mb-1 block text-sm font-medium text-gray-700; }
+.card { @apply rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100; }
+
+/* Branded tenant workspace (used only by the VIELUSOS artist account). */
+.vielusos-dashboard-content .card {
+  background: rgba(11, 11, 16, .76);
+  color: #f7f7fb;
+  --tw-ring-color: rgba(255, 255, 255, .14);
+  backdrop-filter: blur(14px);
+}
+.vielusos-dashboard-content .text-gray-900,
+.vielusos-dashboard-content .text-gray-950 { color: #f7f7fb !important; }
+.vielusos-dashboard-content .text-gray-600,
+.vielusos-dashboard-content .text-gray-500,
+.vielusos-dashboard-content .text-gray-400,
+.vielusos-dashboard-content .text-gray-700 { color: rgba(247, 247, 251, .72) !important; }
+.vielusos-dashboard-content .bg-white { background: rgba(11, 11, 16, .82) !important; }
+.vielusos-dashboard-content .bg-gray-50,
+.vielusos-dashboard-content .bg-gray-100 { background: rgba(255, 255, 255, .06) !important; }
+.vielusos-dashboard-content input,
+.vielusos-dashboard-content textarea,
+.vielusos-dashboard-content select { background: rgba(255, 255, 255, .08); color: #f7f7fb; border-color: rgba(255,255,255,.18); }
+
+/* The visual editor is intentionally a light editing surface, even when the
+   selected tenant has a dark public theme. Keep its controls and canvas
+   readable instead of inheriting the tenant's white-on-dark dashboard text. */
+.vielusos-editor-surface { color: #111827; }
+.vielusos-editor-surface .text-gray-900,
+.vielusos-editor-surface .text-gray-950,
+.vielusos-editor-surface .text-gray-800,
+.vielusos-editor-surface .text-gray-700 { color: #1f2937 !important; }
+.vielusos-editor-surface .text-gray-600,
+.vielusos-editor-surface .text-gray-500,
+.vielusos-editor-surface .text-gray-400 { color: #6b7280 !important; }
+.vielusos-editor-surface .bg-white { background: #fff !important; }
+.vielusos-editor-surface .bg-gray-50 { background: #f9fafb !important; }
+.vielusos-editor-surface .bg-gray-100 { background: #f3f4f6 !important; }
+.vielusos-editor-surface input,
+.vielusos-editor-surface textarea,
+.vielusos-editor-surface select { background: #fff !important; color: #111827 !important; border-color: #d1d5db !important; }
+.badge { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium; }
+
+.legal-content h2 { @apply mt-10 text-2xl font-extrabold tracking-tight text-gray-950; }
+.legal-content h2:first-child { @apply mt-0; }
+.legal-content p { @apply mt-4 text-base leading-8 text-gray-700; }
+.legal-content ul { @apply mt-4 list-disc space-y-2 pl-6 text-gray-700; }
+.legal-content li { @apply leading-8; }
+.legal-content a { @apply font-semibold text-brand-700 underline underline-offset-4 hover:text-brand-900; }

@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Product" ADD COLUMN "images" JSONB NOT NULL DEFAULT '[]';
+ALTER TABLE "Product" ADD COLUMN "category" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "Product" ADD COLUMN "brand" TEXT NOT NULL DEFAULT '';

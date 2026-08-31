@@ -1,38 +1,55 @@
 {
-  "dependencies": {
-    "@expo/metro-runtime": "~57.0.13",
-    "@expo/vector-icons": "^15.1.1",
-    "@react-native-async-storage/async-storage": "2.2.0",
-    "@react-navigation/bottom-tabs": "^7.18.17",
-    "@react-navigation/native": "^7.3.17",
-    "@react-navigation/native-stack": "^7.18.9",
-    "expo": "~57.0.16",
-    "expo-blur": "^57.0.2",
-    "expo-font": "~57.0.1",
-    "expo-haptics": "^57.0.1",
-    "expo-linear-gradient": "^57.0.1",
-    "expo-status-bar": "~57.0.1",
-    "expo-updates": "~57.0.17",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "react-native": "0.86.2",
-    "react-native-safe-area-context": "~5.7.0",
-    "react-native-screens": "~4.26.0",
-    "react-native-web": "^0.21.2"
-  },
-  "name": "magali-berdah-mobile",
-  "version": "1.0.0",
+  "name": "easyasso",
+  "version": "0.1.0",
   "private": true,
-  "main": "index.ts",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
-    "typecheck": "tsc --noEmit"
+    "dev": "next dev",
+    "build": "prisma generate && (prisma migrate deploy || echo 'DB not reachable — skipping migrations') && (tsx prisma/seed-ashley.ts || echo 'ASHLEY seed skipped') && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "postinstall": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:seed:ashley": "tsx prisma/seed-ashley.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.117.1",
+    "@auth/prisma-adapter": "^2.7.4",
+    "@prisma/client": "^6.2.1",
+    "bcryptjs": "^2.4.3",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.474.0",
+    "nanoid": "^5.0.9",
+    "next": "^16.3.1",
+    "next-auth": "^4.24.15",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "sharp": "^0.35.3",
+    "stripe": "^17.5.0",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@types/react": "~19.2.2",
-    "typescript": "~6.0.3"
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.10.7",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "8.5.26",
+    "prisma": "^6.2.1",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.26",
+      "sharp": "0.35.3"
+    },
+    "@prisma/config": {
+      "deepmerge-ts": "8.0.1"
+    }
   }
 }

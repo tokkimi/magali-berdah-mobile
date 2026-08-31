@@ -1,0 +1,423 @@
+// Easy Asso — multi-tenant SaaS website builder for associations
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Auth (NextAuth compatible)
+// ---------------------------------------------------------------------------
+model User {
+  id            String       @id @default(cuid())
+  name          String?
+  email         String       @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  isSuperAdmin  Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  accounts    Account[]
+  sessions    Session[]
+  memberships Membership[]
+  invitesSent Invitation[]   @relation("InvitedBy")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  @@unique([identifier, token])
+}
+
+// ---------------------------------------------------------------------------
+// Organizations (tenants) & access control
+// ---------------------------------------------------------------------------
+enum PlanStatus {
+  TRIAL
+  PENDING_PAYMENT
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+}
+
+model Organization {
+  id            String     @id @default(cuid())
+  name          String
+  slug          String     @unique
+  planStatus    PlanStatus @default(TRIAL)
+  trialEndsAt   DateTime?
+  stripeCustomerId String?
+  stripeSessionId  String?
+  airwallexPaymentLinkId String? @unique
+  paidAt        DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  profile       Json       @default("{}")
+
+  memberships   Membership[]
+  invitations   Invitation[]
+  site          Site?
+  donors        Donor[]
+  campaigns     Campaign[]
+  donations     Donation[]
+  categories    Category[]
+  transactions  Transaction[]
+  subscribers   NewsletterSubscriber[]
+  events        SiteEvent[]
+  contactMessages ContactMessage[]
+  platformMessages PlatformMessage[]
+  roles         Role[]
+  products      Product[]
+  orders        Order[]
+  customerProfiles CustomerProfile[]
+}
+
+enum SystemRole {
+  OWNER
+  ADMIN
+  EDITOR
+  ACCOUNTANT
+  MEMBER
+  VIEWER
+}
+
+model Membership {
+  id             String       @id @default(cuid())
+  userId         String
+  organizationId String
+  systemRole     SystemRole   @default(MEMBER)
+  roleId         String?
+  createdAt      DateTime     @default(now())
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role         Role?        @relation(fields: [roleId], references: [id])
+  @@unique([userId, organizationId])
+}
+
+// Custom roles with granular permission list (see lib/permissions.ts)
+model Role {
+  id             String       @id @default(cuid())
+  organizationId String
+  name           String
+  permissions    String[]     @default([])
+  isSystem       Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  memberships  Membership[]
+  @@unique([organizationId, name])
+}
+
+model Invitation {
+  id             String     @id @default(cuid())
+  organizationId String
+  email          String
+  systemRole     SystemRole @default(MEMBER)
+  token          String     @unique
+  invitedById    String?
+  acceptedAt     DateTime?
+  createdAt      DateTime   @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitedBy    User?        @relation("InvitedBy", fields: [invitedById], references: [id])
+  @@unique([organizationId, email])
+}
+
+// ---------------------------------------------------------------------------
+// Website builder
+// ---------------------------------------------------------------------------
+model Site {
+  id             String   @id @default(cuid())
+  organizationId String   @unique
+  name           String
+  subdomain      String   @unique
+  customDomain   String?  @unique
+  domainVerified Boolean  @default(false)
+  published      Boolean  @default(false)
+  // Theme + header + footer stored as JSON
+  theme          Json     @default("{}")
+  header         Json     @default("{}")
+  footer         Json     @default("{}")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  pages        Page[]
+}
+
+model Page {
+  id        String   @id @default(cuid())
+  siteId    String
+  title     String
+  slug      String
+  order     Int      @default(0)
+  isHome    Boolean  @default(false)
+  showInNav Boolean  @default(true)
+  seoTitle  String?
+  seoDescription String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  site   Site    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  blocks Block[]
+  @@unique([siteId, slug])
+}
+
+model Block {
+  id        String   @id @default(cuid())
+  pageId    String
+  type      String   // text | heading | image | video | social | button | columns | spacer | html
+  order     Int      @default(0)
+  content   Json     @default("{}")
+  style     Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------------------
+// CRM / Donations / Campaigns
+// ---------------------------------------------------------------------------
+model Donor {
+  id             String   @id @default(cuid())
+  organizationId String
+  firstName      String
+  lastName       String
+  email          String?
+  phone          String?
+  address        String?
+  city           String?
+  postalCode     String?
+  country        String?  @default("France")
+  type           String   @default("INDIVIDUAL") // INDIVIDUAL | COMPANY
+  tags           String[] @default([])
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  donations    Donation[]
+}
+
+model Campaign {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  description    String?
+  goalCents      Int      @default(0)
+  startDate      DateTime?
+  endDate        DateTime?
+  status         String   @default("ACTIVE") // DRAFT | ACTIVE | CLOSED
+  externalUrl    String?  // HelloAsso or other external donation link
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  donations    Donation[]
+}
+
+model Donation {
+  id             String   @id @default(cuid())
+  organizationId String
+  donorId        String?
+  campaignId     String?
+  amountCents    Int
+  currency       String   @default("EUR")
+  method         String   @default("STRIPE") // STRIPE | HELLOASSO | CASH | CHECK | TRANSFER | OTHER
+  status         String   @default("COMPLETED") // PENDING | COMPLETED | REFUNDED | FAILED
+  isRecurring    Boolean  @default(false)
+  message        String?
+  receivedAt      DateTime?
+  receivedReference String?
+  proofDocuments Json     @default("[]")
+  stripePaymentId String?
+  receiptNumber  String?
+  receiptIssued  Boolean  @default(false)
+  donatedAt      DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  donor        Donor?       @relation(fields: [donorId], references: [id], onDelete: SetNull)
+  campaign     Campaign?    @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+}
+
+// ---------------------------------------------------------------------------
+// Accounting
+// ---------------------------------------------------------------------------
+model Category {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  kind           String   @default("EXPENSE") // INCOME | EXPENSE
+  color          String?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  @@unique([organizationId, name, kind])
+}
+
+model Transaction {
+  id             String   @id @default(cuid())
+  organizationId String
+  kind           String   // INCOME | EXPENSE
+  label          String
+  amountCents    Int
+  categoryId     String?
+  method         String   @default("OTHER")
+  reference      String?
+  date           DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  category     Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+}
+
+model NewsletterSubscriber {
+  id             String   @id @default(cuid())
+  organizationId String
+  email          String
+  createdAt      DateTime @default(now())
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  @@unique([organizationId, email])
+}
+
+// Lightweight analytics
+model SiteEvent {
+  id             String   @id @default(cuid())
+  organizationId String
+  type           String   // pageview | donation | signup
+  path           String?
+  referrer       String?
+  createdAt      DateTime @default(now())
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  @@index([organizationId, createdAt])
+}
+
+// Two-way conversation between the EasyAsso platform team and an association.
+model PlatformMessage {
+  id             String   @id @default(cuid())
+  organizationId String
+  fromAdmin      Boolean  @default(false)
+  authorName     String
+  body           String
+  readByAdmin    DateTime?
+  readByOrg      DateTime?
+  createdAt      DateTime @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  @@index([organizationId, createdAt])
+}
+
+model Product {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  description    String   @default("")
+  priceCents     Int      @default(0)
+  currency       String   @default("eur")
+  imageUrl       String?  // kept in sync with images[0] for back-compat
+  images         Json     @default("[]") // ordered photos; images[0] = main image
+  category       String   @default("")
+  brand          String   @default("")
+  stock          Int?     // null = unlimited stock
+  active         Boolean  @default(true)
+  order          Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  @@index([organizationId, order])
+}
+
+model Order {
+  id                    String   @id @default(cuid())
+  organizationId        String
+  status                String   @default("PENDING") // PENDING | PAID | SHIPPED | CANCELLED
+  customerName          String   @default("")
+  customerEmail         String   @default("")
+  customerPhone         String   @default("")
+  shippingAddress       String   @default("")
+  totalCents            Int      @default(0)
+  currency              String   @default("eur")
+  stripeSessionId       String?  @unique
+  stripePaymentIntentId String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  items        OrderItem[]
+  @@index([organizationId, createdAt])
+}
+
+model OrderItem {
+  id         String @id @default(cuid())
+  orderId    String
+  productId  String?
+  name       String
+  priceCents Int
+  quantity   Int    @default(1)
+  order      Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  @@index([orderId])
+}
+
+model CustomerProfile {
+  id              String   @id @default(cuid())
+  organizationId  String
+  email           String
+  name            String   @default("")
+  phone           String   @default("")
+  shippingAddress String   @default("")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  lastSeenAt      DateTime @default(now())
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  @@unique([organizationId, email])
+  @@index([organizationId, updatedAt])
+}
+
+model ContactMessage {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  email          String
+  phone          String?
+  subject        String?
+  message        String
+  readAt         DateTime?
+  archivedAt     DateTime?
+  createdAt      DateTime @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  @@index([organizationId, createdAt])
+  @@index([organizationId, readAt])
+}
