@@ -62,9 +62,9 @@ const LINKTREE = "https://linktr.ee/ashley.musicoff";
 const BEATPORT_UNO = "https://www.beatport.com/release/uno-dos-tres/4772465";
 const BEATPORT_INFERNO = "https://www.beatport.com/release/psychedelic-inferno/4938848";
 const BEATPORT = BEATPORT_UNO;
+const SPOTIFY = "https://open.spotify.com/artist/6J9GhUodUMaj81Fj5xbNcB";
+const SOUNDCLOUD = "https://soundcloud.com/ashleymusicoff";
 // Liens routés vers le Linktree officiel tant que les URLs directes ne sont pas fournies.
-const SPOTIFY = LINKTREE;
-const SOUNDCLOUD = LINKTREE;
 const APPLE = LINKTREE;
 const YOUTUBE = LINKTREE;
 const AGENCY = "Hello@skorm-agency.com"; // Contact & booking — SKORM Agency
@@ -83,7 +83,7 @@ type PlatformLink = {
 const PLATFORMS: PlatformLink[] = [
   { label: "Instagram", lib: "ion", icon: "logo-instagram", url: IG, colors: [C.pink, C.violet], handle: "@ashley.musicoff · 24k" },
   { label: "TikTok", lib: "ion", icon: "logo-tiktok", url: TIKTOK, colors: [C.night, C.ink], handle: "@ashley.musicoff" },
-  { label: "SoundCloud", lib: "ion", icon: "logo-soundcloud", url: SOUNDCLOUD, colors: ["#FF7A00", "#FF3D00"], handle: "Sets & extraits" },
+  { label: "SoundCloud", lib: "ion", icon: "logo-soundcloud", url: SOUNDCLOUD, colors: ["#FF7A00", "#FF3D00"], handle: "@ashleymusicoff" },
   { label: "Spotify", lib: "fa", icon: "spotify", url: SPOTIFY, colors: ["#1DB954", "#14833B"], handle: "Singles & EP" },
   { label: "Apple Music", lib: "ion", icon: "logo-apple", url: APPLE, colors: ["#FB5C74", "#FA2D6F"], handle: "Discographie" },
   { label: "YouTube", lib: "ion", icon: "logo-youtube", url: YOUTUBE, colors: ["#FF3B3B", "#CC0000"], handle: "Clips & mixes" },
