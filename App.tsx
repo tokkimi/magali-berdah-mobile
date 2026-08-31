@@ -63,6 +63,7 @@ const SPOTIFY = LINKTREE;
 const SOUNDCLOUD = LINKTREE;
 const APPLE = LINKTREE;
 const YOUTUBE = LINKTREE;
+const AGENCY = "Hello@skorm-agency.com"; // Booking via SKORM Agency
 const BOOKING = "ashley.booking.music@gmail.com";
 const SLOGAN = "Escape the mind, Enter the rave";
 
@@ -922,14 +923,14 @@ function Live() {
           </View>
           <Text style={st.bookTitle}>Bookez ASHLEY</Text>
           <Text style={st.bookSub}>
-            Club, festival, marque ou soirée privée — parlons-en.
+            Club, festival, marque ou soirée privée — booking via SKORM Agency.
           </Text>
           <GlowButton
             label="Demande de booking"
             icon="mail"
-            onPress={() => openURL(`mailto:${BOOKING}?subject=Booking%20ASHLEY`)}
+            onPress={() => openURL(`mailto:${AGENCY}?subject=Booking%20ASHLEY`)}
           />
-          <Text style={st.bookMail}>{BOOKING}</Text>
+          <Text style={st.bookMail}>{AGENCY}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -998,19 +999,35 @@ function Contact() {
           <Text style={st.contactSlogan}>« {SLOGAN} »</Text>
         </View>
 
-        {/* Bulle contact : e-mail booking direct */}
+        {/* Bulle contact : booking via SKORM Agency + contact direct */}
         <Pressable
           style={st.mailBubble}
+          onPress={() => {
+            buzz();
+            openURL(`mailto:${AGENCY}?subject=Booking%20ASHLEY`);
+          }}
+        >
+          <View style={st.mailBubbleIcon}>
+            <Ionicons name="sparkles" size={18} color={C.white} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={st.mailBubbleLabel}>Booking · SKORM Agency</Text>
+            <Text style={st.mailBubbleMail}>{AGENCY}</Text>
+          </View>
+          <Feather name="chevron-right" size={20} color={C.muted} />
+        </Pressable>
+        <Pressable
+          style={[st.mailBubble, { marginTop: 10 }]}
           onPress={() => {
             buzz();
             openURL(`mailto:${BOOKING}?subject=Contact%20ASHLEY`);
           }}
         >
-          <View style={st.mailBubbleIcon}>
+          <View style={[st.mailBubbleIcon, { backgroundColor: C.pink }]}>
             <Feather name="mail" size={18} color={C.white} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={st.mailBubbleLabel}>Booking &amp; presse</Text>
+            <Text style={st.mailBubbleLabel}>Contact direct</Text>
             <Text style={st.mailBubbleMail}>{BOOKING}</Text>
           </View>
           <Feather name="chevron-right" size={20} color={C.muted} />
