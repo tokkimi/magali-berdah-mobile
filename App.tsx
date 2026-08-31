@@ -73,15 +73,17 @@ type PlatformLink = {
   icon: string;
   url: string;
   colors: [string, string];
+  handle: string;
 };
 
 const PLATFORMS: PlatformLink[] = [
-  { label: "Spotify", lib: "fa", icon: "spotify", url: SPOTIFY, colors: ["#1DB954", "#14833B"] },
-  { label: "SoundCloud", lib: "ion", icon: "logo-soundcloud", url: SOUNDCLOUD, colors: ["#FF7A00", "#FF3D00"] },
-  { label: "Apple Music", lib: "ion", icon: "logo-apple", url: APPLE, colors: ["#FB5C74", "#FA2D6F"] },
-  { label: "YouTube", lib: "ion", icon: "logo-youtube", url: YOUTUBE, colors: ["#FF3B3B", "#CC0000"] },
-  { label: "TikTok", lib: "ion", icon: "logo-tiktok", url: TIKTOK, colors: [C.night, C.ink] },
-  { label: "Instagram", lib: "ion", icon: "logo-instagram", url: IG, colors: [C.pink, C.violet] },
+  { label: "Instagram", lib: "ion", icon: "logo-instagram", url: IG, colors: [C.pink, C.violet], handle: "@ashley.musicoff · 24k" },
+  { label: "TikTok", lib: "ion", icon: "logo-tiktok", url: TIKTOK, colors: [C.night, C.ink], handle: "@ashley.musicoff" },
+  { label: "SoundCloud", lib: "ion", icon: "logo-soundcloud", url: SOUNDCLOUD, colors: ["#FF7A00", "#FF3D00"], handle: "Sets & extraits" },
+  { label: "Spotify", lib: "fa", icon: "spotify", url: SPOTIFY, colors: ["#1DB954", "#14833B"], handle: "Singles & EP" },
+  { label: "Apple Music", lib: "ion", icon: "logo-apple", url: APPLE, colors: ["#FB5C74", "#FA2D6F"], handle: "Discographie" },
+  { label: "YouTube", lib: "ion", icon: "logo-youtube", url: YOUTUBE, colors: ["#FF3B3B", "#CC0000"], handle: "Clips & mixes" },
+  { label: "Tous les liens", lib: "feather", icon: "link", url: LINKTREE, colors: [C.violet, C.cyan], handle: "Linktree" },
 ];
 
 function PlatIcon({ p, size = 20, color = "#fff" }: { p: PlatformLink; size?: number; color?: string }) {
@@ -98,14 +100,13 @@ const buzz = (
   if (Platform.OS !== "web") Haptics.impactAsync(style).catch(() => {});
 };
 
-// Grille de plateformes cliquables
-function PlatformGrid() {
+// Gros blocs réseaux pleine largeur (façon Vielusos, en plus prononcé)
+function SocialBlocks({ items = PLATFORMS }: { items?: PlatformLink[] }) {
   return (
-    <View style={st.platGrid}>
-      {PLATFORMS.map((p) => (
+    <View style={st.blockList}>
+      {items.map((p) => (
         <Pressable
           key={p.label}
-          style={st.platCell}
           onPress={() => {
             buzz();
             openURL(p.url);
@@ -115,46 +116,22 @@ function PlatformGrid() {
             colors={p.colors}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={st.platIcon}
+            style={st.block}
           >
-            <PlatIcon p={p} />
+            <View style={st.blockIcon}>
+              <PlatIcon p={p} size={24} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={st.blockLabel}>{p.label}</Text>
+              <Text style={st.blockHandle}>{p.handle}</Text>
+            </View>
+            <View style={st.blockGo}>
+              <Feather name="arrow-up-right" size={20} color={C.white} />
+            </View>
           </LinearGradient>
-          <Text style={st.platLabel}>{p.label}</Text>
         </Pressable>
       ))}
     </View>
-  );
-}
-
-// Rangée horizontale compacte de plateformes
-function PlatformRow() {
-  return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ gap: 10, paddingHorizontal: 18 }}
-    >
-      {PLATFORMS.map((p) => (
-        <Pressable
-          key={p.label}
-          style={st.platPill}
-          onPress={() => {
-            buzz();
-            openURL(p.url);
-          }}
-        >
-          <LinearGradient
-            colors={p.colors}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={st.platPillIcon}
-          >
-            <PlatIcon p={p} size={15} />
-          </LinearGradient>
-          <Text style={st.platPillText}>{p.label}</Text>
-        </Pressable>
-      ))}
-    </ScrollView>
   );
 }
 
@@ -712,17 +689,9 @@ function Home({ navigation }: any) {
           />
         </View>
 
-        {/* PLATEFORMES */}
-        <SectionTitle label="STREAMING" title="Écouter partout" />
-        <PlatformRow />
-        <View style={{ paddingHorizontal: 18, marginTop: 12 }}>
-          <GlowButton
-            label="Tous les liens"
-            icon="link"
-            soft
-            onPress={() => openURL(LINKTREE)}
-          />
-        </View>
+        {/* RÉSEAUX */}
+        <SectionTitle label="STREAMING & RÉSEAUX" title="Écouter & suivre" />
+        <SocialBlocks />
 
         {/* MIXES */}
         <SectionTitle label="EN LIVE" title="Sets & mixes" action="Écouter" />
@@ -830,18 +799,8 @@ function Sons() {
           ))}
         </View>
 
-        <View style={st.streamCard}>
-          <Text style={st.streamTitle}>Écouter partout</Text>
-          <Text style={st.streamSub}>
-            Les sorties &amp; sets d'ASHLEY sur toutes les plateformes.
-          </Text>
-          <View style={{ alignSelf: "stretch" }}>
-            <PlatformGrid />
-          </View>
-          <View style={{ alignSelf: "stretch", marginTop: 6 }}>
-            <GlowButton label="Tous les liens" icon="link" onPress={() => openURL(LINKTREE)} />
-          </View>
-        </View>
+        <SectionTitle label="STREAMING & RÉSEAUX" title="Écouter partout" />
+        <SocialBlocks />
       </ScrollView>
     </SafeAreaView>
   );
@@ -1016,12 +975,9 @@ function Contact() {
           <Feather name="chevron-right" size={20} color={C.muted} />
         </Pressable>
 
-        {/* Toutes les plateformes */}
-        <SectionTitle label="RETROUVE ASHLEY" title="Sur chaque plateforme" />
-        <PlatformGrid />
-        <View style={{ paddingHorizontal: 18, marginTop: 12 }}>
-          <GlowButton label="Tous les liens" icon="link" onPress={() => openURL(LINKTREE)} />
-        </View>
+        {/* Réseaux */}
+        <SectionTitle label="RETROUVE ASHLEY" title="Ses réseaux" />
+        <SocialBlocks />
 
         <View style={st.form}>
           <Text style={st.formTitle}>Un message direct ?</Text>
@@ -1800,6 +1756,38 @@ const st = StyleSheet.create({
     justifyContent: "center",
   },
   platPillText: { fontSize: 13, fontWeight: "800", color: C.ink },
+
+  /* gros blocs réseaux */
+  blockList: { paddingHorizontal: 18, gap: 12 },
+  block: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    padding: 16,
+    borderRadius: 22,
+    shadowColor: C.violet,
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+  },
+  blockIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: "rgba(255,255,255,0.22)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  blockLabel: { fontSize: 17, fontWeight: "900", color: C.white, letterSpacing: 0.2 },
+  blockHandle: { fontSize: 12.5, color: "rgba(255,255,255,0.9)", marginTop: 2, fontWeight: "700" },
+  blockGo: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
   formTitle: { fontSize: 17, fontWeight: "900", color: C.ink, marginBottom: 4 },
   socialRow: { flexDirection: "row", gap: 12, marginTop: 14 },
