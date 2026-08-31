@@ -7,13 +7,9 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.magaliberdah.marketplace",
-      "buildNumber": "1",
-      "infoPlist": {
-        "NSCameraUsageDescription": "La caméra permet d’ajouter des photos aux annonces.",
-        "NSPhotoLibraryUsageDescription": "Votre photothèque permet d’ajouter des photos aux annonces."
-      }
+      "buildNumber": "1"
     },
     "android": {
       "package": "com.magaliberdah.marketplace",

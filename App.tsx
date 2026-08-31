@@ -26,6 +26,7 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { Feather, Ionicons } from "@expo/vector-icons";
+import { LEGAL_DOCUMENTS, LEGAL_MENU } from "./legalContent";
 
 const C = {
   ink: "#17140f",
@@ -687,6 +688,219 @@ function Auctions({ navigation }: any) {
     </SafeAreaView>
   );
 }
+function SimpleTopBar({ navigation, title }: any) {
+  return (
+    <View style={s.modalHead}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Retour"
+        onPress={() => navigation.goBack()}
+      >
+        <Ionicons name="arrow-back" size={23} color={C.ink} />
+      </Pressable>
+      <Text style={s.wordmark}>{title}</Text>
+      <View style={{ width: 23 }} />
+    </View>
+  );
+}
+function LegalCenter({ navigation }: any) {
+  return (
+    <SafeAreaView style={s.safe}>
+      <SimpleTopBar navigation={navigation} title="INFORMATIONS" />
+      <ScrollView contentContainerStyle={s.legalPage}>
+        <Text style={s.legalHero}>Clair, sécurisé,{`\n`}sans surprise.</Text>
+        <Text style={s.body}>
+          Retrouvez les règles applicables avant de créer un compte, enchérir ou
+          acheter.
+        </Text>
+        <View style={s.noticeBox}>
+          <Ionicons name="construct-outline" size={20} color={C.gold} />
+          <Text style={s.noticeText}>
+            Version de préparation. Les mentions entre crochets doivent être
+            complétées et validées avant publication commerciale.
+          </Text>
+        </View>
+        {LEGAL_MENU.map((item) => (
+          <Pressable
+            key={item.key}
+            style={s.legalMenu}
+            onPress={() =>
+              navigation.navigate("LegalDocument", { key: item.key })
+            }
+          >
+            <View style={s.legalIcon}>
+              <Ionicons
+                name={`${item.icon}-outline` as any}
+                size={20}
+                color={C.gold}
+              />
+            </View>
+            <Text style={s.menuText}>{item.label}</Text>
+            <Ionicons name="chevron-forward" size={17} color={C.muted} />
+          </Pressable>
+        ))}
+        <Pressable
+          style={s.legalMenu}
+          onPress={() => navigation.navigate("DeleteAccount")}
+        >
+          <View style={s.legalIcon}>
+            <Ionicons name="trash-outline" size={20} color={C.red} />
+          </View>
+          <Text style={s.menuText}>Suppression du compte</Text>
+          <Ionicons name="chevron-forward" size={17} color={C.muted} />
+        </Pressable>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+function LegalDocument({ route, navigation }: any) {
+  const document = LEGAL_DOCUMENTS[route.params.key] || LEGAL_DOCUMENTS.legal;
+  return (
+    <SafeAreaView style={s.safe}>
+      <SimpleTopBar navigation={navigation} title="DOCUMENT" />
+      <ScrollView contentContainerStyle={s.legalPage}>
+        <Text style={s.legalTitle}>{document.title}</Text>
+        <Text style={s.legalUpdated}>{document.updated}</Text>
+        {document.sections.map((section) => (
+          <View key={section.heading} style={s.legalSection}>
+            <Text style={s.legalHeading}>{section.heading}</Text>
+            <Text style={s.legalBody}>{section.body}</Text>
+          </View>
+        ))}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+function DeleteAccount({ navigation }: any) {
+  const [confirmed, setConfirmed] = useState(false);
+  return (
+    <SafeAreaView style={s.safe}>
+      <SimpleTopBar navigation={navigation} title="MES DONNÉES" />
+      <ScrollView contentContainerStyle={s.legalPage}>
+        <View style={s.dangerIcon}>
+          <Ionicons name="person-remove-outline" size={30} color={C.red} />
+        </View>
+        <Text style={s.legalTitle}>Supprimer mon compte</Text>
+        <Text style={s.legalBody}>
+          Cette demande supprimera le profil, les adresses, favoris et
+          préférences. Les factures, opérations et éléments nécessaires au
+          respect d’obligations légales pourront être conservés pendant leur
+          durée réglementaire, puis supprimés ou anonymisés.
+        </Text>
+        <View style={s.noticeBox}>
+          <Ionicons name="alert-circle-outline" size={20} color={C.red} />
+          <Text style={s.noticeText}>
+            Une commande, un litige ou une enchère encore active devra être
+            traité avant la fermeture définitive.
+          </Text>
+        </View>
+        <Pressable
+          style={s.checkRow}
+          onPress={() => setConfirmed((value) => !value)}
+        >
+          <Ionicons
+            name={confirmed ? "checkbox" : "square-outline"}
+            size={24}
+            color={confirmed ? C.gold : C.muted}
+          />
+          <Text style={s.checkText}>
+            Je comprends que cette action est irréversible après le délai légal
+            de traitement.
+          </Text>
+        </Pressable>
+        <Pressable
+          disabled={!confirmed}
+          style={[s.deleteBtn, !confirmed && s.disabledBtn]}
+          onPress={() =>
+            Alert.alert(
+              "Fonction préparée",
+              "La demande sera activée dès que le service de comptes sécurisé sera connecté.",
+            )
+          }
+        >
+          <Text style={s.btnText}>DEMANDER LA SUPPRESSION</Text>
+        </Pressable>
+        <Text style={s.helper}>
+          Une page web publique de suppression devra également être publiée
+          avant le dépôt sur Google Play.
+        </Text>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+function BidConfirm({ route, navigation }: any) {
+  const product = P.find((item) => item.id === route.params.id)!;
+  const nextBid = (product.bid || product.price) + 50;
+  const [accepted, setAccepted] = useState(false);
+  return (
+    <SafeAreaView style={s.safe}>
+      <SimpleTopBar navigation={navigation} title="CONFIRMER LA MISE" />
+      <ScrollView contentContainerStyle={s.legalPage}>
+        <View style={s.bidSummary}>
+          <Image source={{ uri: product.image }} style={s.bidSummaryImage} />
+          <View style={{ flex: 1 }}>
+            <Text style={s.brand}>{product.brand}</Text>
+            <Text style={s.bidTitle}>{product.title}</Text>
+            <Text style={s.helper}>Fin dans {product.ends}</Text>
+          </View>
+        </View>
+        <Text style={s.legalHeading}>Récapitulatif avant engagement</Text>
+        <View style={s.costRow}>
+          <Text style={s.infoLabel}>Votre mise</Text>
+          <Text style={s.infoValue}>{money(nextBid)}</Text>
+        </View>
+        <View style={s.costRow}>
+          <Text style={s.infoLabel}>Commission acheteur</Text>
+          <Text style={s.pendingText}>À définir</Text>
+        </View>
+        <View style={s.costRow}>
+          <Text style={s.infoLabel}>Livraison assurée</Text>
+          <Text style={s.pendingText}>À calculer</Text>
+        </View>
+        <View style={s.totalRow}>
+          <Text style={s.bidLabel}>TOTAL MAXIMAL</Text>
+          <Text style={s.actionPrice}>À finaliser</Text>
+        </View>
+        <View style={s.noticeBox}>
+          <Ionicons name="shield-checkmark-outline" size={20} color={C.gold} />
+          <Text style={s.noticeText}>
+            Aucune vraie mise ne sera enregistrée avant connexion du serveur, de
+            l’identité et du moyen de paiement sécurisé.
+          </Text>
+        </View>
+        <Pressable
+          style={s.checkRow}
+          onPress={() => setAccepted((value) => !value)}
+        >
+          <Ionicons
+            name={accepted ? "checkbox" : "square-outline"}
+            size={24}
+            color={accepted ? C.gold : C.muted}
+          />
+          <Text style={s.checkText}>
+            J’ai lu le règlement des enchères et je comprends qu’une mise
+            confirmée pourra m’engager à payer.
+          </Text>
+        </Pressable>
+        <Pressable
+          style={s.textLink}
+          onPress={() =>
+            navigation.navigate("LegalDocument", { key: "auctions" })
+          }
+        >
+          <Text style={s.textLinkLabel}>LIRE LE RÈGLEMENT DES ENCHÈRES</Text>
+        </Pressable>
+        <Pressable
+          disabled={!accepted}
+          style={[s.blackBtn, !accepted && s.disabledBtn]}
+          onPress={() => navigation.navigate("Login")}
+        >
+          <Text style={s.btnText}>CONTINUER ET S’IDENTIFIER</Text>
+        </Pressable>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
 function Account({ navigation }: any) {
   return (
     <SafeAreaView style={s.safe}>
@@ -709,14 +923,19 @@ function Account({ navigation }: any) {
           </Pressable>
         </View>
         {[
-          ["package", "Mes commandes"],
-          ["hammer", "Mes enchères"],
-          ["location", "Mes adresses"],
-          ["card", "Moyens de paiement"],
-          ["notifications", "Notifications"],
-          ["help-circle", "Aide & conciergerie"],
-        ].map(([i, t]) => (
-          <Pressable key={t} style={s.menu}>
+          ["package", "Mes commandes", "Login"],
+          ["hourglass", "Mes enchères", "Enchères"],
+          ["location", "Mes adresses", "Login"],
+          ["card", "Moyens de paiement", "Login"],
+          ["notifications", "Notifications", "Login"],
+          ["help-circle", "Aide & conciergerie", "LegalCenter"],
+          ["shield-checkmark", "Informations légales", "LegalCenter"],
+        ].map(([i, t, destination]) => (
+          <Pressable
+            key={t}
+            style={s.menu}
+            onPress={() => navigation.navigate(destination)}
+          >
             <Ionicons name={`${i}-outline` as any} size={20} />
             <Text style={s.menuText}>{t}</Text>
             <Ionicons name="chevron-forward" size={17} color={C.muted} />
@@ -794,10 +1013,7 @@ function Product({ route, navigation }: any) {
           onPress={() => {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             p.auction
-              ? Alert.alert(
-                  "Enchère préparée",
-                  "Connectez-vous pour la confirmer.",
-                )
+              ? navigation.navigate("BidConfirm", { id: p.id })
               : (add(p), Alert.alert("Ajouté au panier", p.title));
           }}
         >
@@ -930,9 +1146,16 @@ function Login({ navigation }: any) {
         <Text style={s.btnText}>CONTINUER</Text>
       </Pressable>
       <Text style={s.loginLegal}>
-        En continuant, vous acceptez nos conditions d’utilisation et notre
-        politique de confidentialité.
+        En continuant, vous reconnaissez avoir accès aux conditions et à la
+        politique de confidentialité. Aucun consentement commercial facultatif
+        n’est présélectionné.
       </Text>
+      <Pressable
+        style={s.loginLegalLink}
+        onPress={() => navigation.navigate("LegalCenter")}
+      >
+        <Text style={s.loginLegalLinkText}>CONSULTER LES DOCUMENTS</Text>
+      </Pressable>
     </SafeAreaView>
   );
 }
@@ -1004,6 +1227,10 @@ function MobileExperience({ value }: any) {
             <Stack.Screen name="Tabs" component={TabNav} />
             <Stack.Screen name="Product" component={Product} />
             <Stack.Screen name="Search" component={Search} />
+            <Stack.Screen name="LegalCenter" component={LegalCenter} />
+            <Stack.Screen name="LegalDocument" component={LegalDocument} />
+            <Stack.Screen name="DeleteAccount" component={DeleteAccount} />
+            <Stack.Screen name="BidConfirm" component={BidConfirm} />
             <Stack.Screen
               name="Cart"
               component={Cart}
@@ -1648,6 +1875,130 @@ const s = StyleSheet.create({
     color: "#888",
     textAlign: "center",
     marginTop: 22,
+  },
+  loginLegalLink: { alignSelf: "center", padding: 12 },
+  loginLegalLinkText: {
+    color: C.gold,
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 1,
+  },
+  legalPage: { padding: 22, paddingBottom: 48 },
+  legalHero: {
+    fontFamily: "serif",
+    fontSize: 34,
+    lineHeight: 41,
+    color: C.ink,
+    marginTop: 10,
+  },
+  legalTitle: {
+    fontFamily: "serif",
+    fontSize: 31,
+    lineHeight: 38,
+    color: C.ink,
+    marginTop: 8,
+  },
+  legalUpdated: {
+    fontSize: 11,
+    lineHeight: 17,
+    color: C.gold,
+    fontWeight: "700",
+    marginTop: 10,
+    marginBottom: 12,
+  },
+  legalSection: {
+    paddingVertical: 18,
+    borderBottomWidth: 1,
+    borderColor: C.line,
+  },
+  legalHeading: {
+    fontFamily: "serif",
+    fontSize: 19,
+    lineHeight: 25,
+    color: C.ink,
+    marginBottom: 8,
+  },
+  legalBody: { fontSize: 13, lineHeight: 21, color: C.muted },
+  legalMenu: {
+    minHeight: 64,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderBottomWidth: 1,
+    borderColor: C.line,
+  },
+  legalIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#eee4d6",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  noticeBox: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    padding: 14,
+    backgroundColor: "#eee4d6",
+    borderRadius: 12,
+    marginVertical: 18,
+  },
+  noticeText: { flex: 1, fontSize: 11, lineHeight: 17, color: C.ink },
+  dangerIcon: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: "#f4dfdc",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  checkRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 11,
+    paddingVertical: 16,
+  },
+  checkText: { flex: 1, fontSize: 12, lineHeight: 19, color: C.ink },
+  deleteBtn: {
+    height: 52,
+    backgroundColor: C.red,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 12,
+  },
+  disabledBtn: { opacity: 0.38 },
+  helper: { fontSize: 10, lineHeight: 16, color: C.muted, marginTop: 10 },
+  bidSummary: {
+    flexDirection: "row",
+    gap: 14,
+    padding: 12,
+    backgroundColor: C.paper,
+    borderRadius: 14,
+    marginBottom: 24,
+  },
+  bidSummaryImage: { width: 78, height: 98, borderRadius: 9 },
+  costRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderColor: C.line,
+  },
+  totalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 18,
+  },
+  pendingText: { fontSize: 12, fontWeight: "700", color: C.red },
+  textLink: { alignItems: "center", paddingVertical: 14 },
+  textLinkLabel: {
+    color: C.gold,
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 1,
   },
   luxuryBar: {
     height: 78,
