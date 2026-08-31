@@ -12,8 +12,8 @@ export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   manifest: '/manifest.webmanifest',
   icons: {
-    icon: [{ url: '/favicon.ico' }, { url: '/icon-192.png', type: 'image/png', sizes: '192x192' }],
-    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+    icon: [{ url: '/ashley/favicon.png', type: 'image/png' }],
+    apple: [{ url: '/ashley/favicon.png' }],
   },
   title: { default: TITLE, template: '%s · Easy Asso' },
   description: DESCRIPTION,
