@@ -28,7 +28,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather, FontAwesome, Ionicons } from "@expo/vector-icons";
 
 /* --------------------------------------------------------------------------
    ASHLEY — « TECHNO DOLL »
@@ -56,8 +56,108 @@ const C = {
 };
 
 const IG = "https://www.instagram.com/ashley.musicoff/";
+const TIKTOK = "https://www.tiktok.com/@ashley.musicoff";
+const SPOTIFY = "https://open.spotify.com/artist/0JbsjL74YqmrAZuImwy8FZ";
+const SOUNDCLOUD = "https://soundcloud.com/skorm888";
+const LINKTREE = "https://linktr.ee/ashley.musicoff";
+// Liens routés vers le Linktree officiel tant que l'URL directe n'est pas fournie.
+const APPLE = LINKTREE;
+const YOUTUBE = LINKTREE;
 const BOOKING = "ashley.booking.music@gmail.com";
 const SLOGAN = "Escape the mind, Enter the rave";
+const ALIAS = "SKORM";
+
+type Lib = "fa" | "ion" | "feather";
+type PlatformLink = {
+  label: string;
+  lib: Lib;
+  icon: string;
+  url: string;
+  colors: [string, string];
+};
+
+const PLATFORMS: PlatformLink[] = [
+  { label: "Spotify", lib: "fa", icon: "spotify", url: SPOTIFY, colors: ["#1DB954", "#14833B"] },
+  { label: "SoundCloud", lib: "ion", icon: "logo-soundcloud", url: SOUNDCLOUD, colors: ["#FF7A00", "#FF3D00"] },
+  { label: "Apple Music", lib: "ion", icon: "logo-apple", url: APPLE, colors: ["#FB5C74", "#FA2D6F"] },
+  { label: "YouTube", lib: "ion", icon: "logo-youtube", url: YOUTUBE, colors: ["#FF3B3B", "#CC0000"] },
+  { label: "TikTok", lib: "ion", icon: "logo-tiktok", url: TIKTOK, colors: [C.night, C.ink] },
+  { label: "Instagram", lib: "ion", icon: "logo-instagram", url: IG, colors: [C.pink, C.violet] },
+];
+
+function PlatIcon({ p, size = 20, color = "#fff" }: { p: PlatformLink; size?: number; color?: string }) {
+  if (p.lib === "fa") return <FontAwesome name={p.icon as any} size={size} color={color} />;
+  if (p.lib === "feather") return <Feather name={p.icon as any} size={size} color={color} />;
+  return <Ionicons name={p.icon as any} size={size} color={color} />;
+}
+
+const openURL = (url: string) => Linking.openURL(url).catch(() => {});
+
+const buzz = (
+  style: Haptics.ImpactFeedbackStyle = Haptics.ImpactFeedbackStyle.Light,
+) => {
+  if (Platform.OS !== "web") Haptics.impactAsync(style).catch(() => {});
+};
+
+// Grille de plateformes cliquables
+function PlatformGrid() {
+  return (
+    <View style={st.platGrid}>
+      {PLATFORMS.map((p) => (
+        <Pressable
+          key={p.label}
+          style={st.platCell}
+          onPress={() => {
+            buzz();
+            openURL(p.url);
+          }}
+        >
+          <LinearGradient
+            colors={p.colors}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={st.platIcon}
+          >
+            <PlatIcon p={p} />
+          </LinearGradient>
+          <Text style={st.platLabel}>{p.label}</Text>
+        </Pressable>
+      ))}
+    </View>
+  );
+}
+
+// Rangée horizontale compacte de plateformes
+function PlatformRow() {
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{ gap: 10, paddingHorizontal: 18 }}
+    >
+      {PLATFORMS.map((p) => (
+        <Pressable
+          key={p.label}
+          style={st.platPill}
+          onPress={() => {
+            buzz();
+            openURL(p.url);
+          }}
+        >
+          <LinearGradient
+            colors={p.colors}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={st.platPillIcon}
+          >
+            <PlatIcon p={p} size={15} />
+          </LinearGradient>
+          <Text style={st.platPillText}>{p.label}</Text>
+        </Pressable>
+      ))}
+    </ScrollView>
+  );
+}
 
 type Track = {
   id: string;
@@ -96,6 +196,18 @@ type Show = {
 
 const TRACKS: Track[] = [
   {
+    id: "t0",
+    title: "UNO DOS TRES",
+    kind: "Single",
+    bpm: 150,
+    year: "2026",
+    length: "5:36",
+    color: [C.pink, C.cyan],
+    art: "https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=900&q=90",
+    tag: "Acid techno",
+    fresh: true,
+  },
+  {
     id: "t1",
     title: "DOLL MACHINE",
     kind: "Single",
@@ -103,7 +215,7 @@ const TRACKS: Track[] = [
     year: "2026",
     length: "5:42",
     color: [C.pink, C.violet],
-    art: "https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=900&q=90",
+    art: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=900&q=90",
     tag: "Hard techno",
     fresh: true,
   },
@@ -302,11 +414,6 @@ const Player = createContext<PlayerState>({
   like: () => {},
 });
 const usePlayer = () => useContext(Player);
-
-const buzz = (style: Haptics.ImpactFeedbackStyle = Haptics.ImpactFeedbackStyle.Light) => {
-  if (Platform.OS !== "web") Haptics.impactAsync(style).catch(() => {});
-};
-const openURL = (url: string) => Linking.openURL(url).catch(() => {});
 
 /* ------------------------------ Composants ------------------------------- */
 
@@ -606,6 +713,18 @@ function Home({ navigation }: any) {
           />
         </View>
 
+        {/* PLATEFORMES */}
+        <SectionTitle label="STREAMING" title="Écouter partout" action="SKORM" />
+        <PlatformRow />
+        <View style={{ paddingHorizontal: 18, marginTop: 12 }}>
+          <GlowButton
+            label="Tous les liens"
+            icon="link"
+            soft
+            onPress={() => openURL(LINKTREE)}
+          />
+        </View>
+
         {/* MIXES */}
         <SectionTitle label="EN LIVE" title="Sets & mixes" action="Écouter" />
         <ScrollView
@@ -713,15 +832,16 @@ function Sons() {
         </View>
 
         <View style={st.streamCard}>
-          <Text style={st.streamTitle}>Retrouve tous les sons</Text>
+          <Text style={st.streamTitle}>Écouter partout</Text>
           <Text style={st.streamSub}>
-            Sets, extraits et sorties en avant-première sur Instagram.
+            Sorties &amp; sets d'ASHLEY (alias {ALIAS}) sur toutes les plateformes.
           </Text>
-          <GlowButton
-            label="@ashley.musicoff"
-            icon="logo-instagram"
-            onPress={() => openURL(IG)}
-          />
+          <View style={{ alignSelf: "stretch" }}>
+            <PlatformGrid />
+          </View>
+          <View style={{ alignSelf: "stretch", marginTop: 6 }}>
+            <GlowButton label="Tous les liens" icon="link" onPress={() => openURL(LINKTREE)} />
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -875,22 +995,38 @@ function Contact() {
             <Text style={st.contactInitial}>A</Text>
           </View>
           <Text style={st.contactName}>ASHLEY</Text>
+          <Text style={st.contactAlias}>aka {ALIAS}</Text>
           <Text style={st.contactRole}>Hard Techno · DJ &amp; Productrice</Text>
           <Text style={st.contactSlogan}>« {SLOGAN} »</Text>
-          <View style={st.socialRow}>
-            <Pressable style={st.social} onPress={() => openURL(IG)}>
-              <Feather name="instagram" size={18} color={C.violet} />
-            </Pressable>
-            <Pressable
-              style={st.social}
-              onPress={() => openURL(`mailto:${BOOKING}`)}
-            >
-              <Feather name="mail" size={18} color={C.violet} />
-            </Pressable>
+        </View>
+
+        {/* Bulle contact : e-mail booking direct */}
+        <Pressable
+          style={st.mailBubble}
+          onPress={() => {
+            buzz();
+            openURL(`mailto:${BOOKING}?subject=Contact%20ASHLEY`);
+          }}
+        >
+          <View style={st.mailBubbleIcon}>
+            <Feather name="mail" size={18} color={C.white} />
           </View>
+          <View style={{ flex: 1 }}>
+            <Text style={st.mailBubbleLabel}>Booking &amp; presse</Text>
+            <Text style={st.mailBubbleMail}>{BOOKING}</Text>
+          </View>
+          <Feather name="chevron-right" size={20} color={C.muted} />
+        </Pressable>
+
+        {/* Toutes les plateformes */}
+        <SectionTitle label="RETROUVE ASHLEY" title="Sur chaque plateforme" action={ALIAS} />
+        <PlatformGrid />
+        <View style={{ paddingHorizontal: 18, marginTop: 12 }}>
+          <GlowButton label="Tous les liens" icon="link" onPress={() => openURL(LINKTREE)} />
         </View>
 
         <View style={st.form}>
+          <Text style={st.formTitle}>Un message direct ?</Text>
           <Text style={st.formLabel}>Ton nom</Text>
           <TextInput
             style={st.input}
@@ -1598,7 +1734,76 @@ const st = StyleSheet.create({
   contactInitial: { fontSize: 40, fontWeight: "900", color: C.white },
   contactName: { fontSize: 26, fontWeight: "900", color: C.ink, marginTop: 12, letterSpacing: 1 },
   contactRole: { fontSize: 13, color: C.muted, marginTop: 2, fontWeight: "700" },
+  contactAlias: { fontSize: 12, color: C.pink, marginTop: 4, fontWeight: "900", letterSpacing: 3 },
   contactSlogan: { fontSize: 12.5, color: C.violet, marginTop: 6, fontWeight: "800", fontStyle: "italic" },
+
+  /* mail bubble */
+  mailBubble: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginHorizontal: 18,
+    marginTop: 16,
+    padding: 12,
+    borderRadius: 20,
+    backgroundColor: C.cloud,
+    borderWidth: 1,
+    borderColor: C.line,
+  },
+  mailBubbleIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: C.violet,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mailBubbleLabel: { fontSize: 14, fontWeight: "900", color: C.ink },
+  mailBubbleMail: { fontSize: 12, color: C.muted, marginTop: 2, fontWeight: "700" },
+
+  /* platforms */
+  platGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    paddingHorizontal: 18,
+    rowGap: 16,
+  },
+  platCell: { width: "30%", alignItems: "center", gap: 7 },
+  platIcon: {
+    width: 62,
+    height: 62,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: C.violet,
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
+  },
+  platLabel: { fontSize: 11.5, fontWeight: "800", color: C.ink },
+  platPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingRight: 16,
+    paddingLeft: 6,
+    paddingVertical: 6,
+    borderRadius: 24,
+    backgroundColor: C.cloud,
+    borderWidth: 1,
+    borderColor: C.line,
+  },
+  platPillIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  platPillText: { fontSize: 13, fontWeight: "800", color: C.ink },
+
+  formTitle: { fontSize: 17, fontWeight: "900", color: C.ink, marginBottom: 4 },
   socialRow: { flexDirection: "row", gap: 12, marginTop: 14 },
   social: {
     width: 46,
