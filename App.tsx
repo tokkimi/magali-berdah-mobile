@@ -63,8 +63,7 @@ const SPOTIFY = LINKTREE;
 const SOUNDCLOUD = LINKTREE;
 const APPLE = LINKTREE;
 const YOUTUBE = LINKTREE;
-const AGENCY = "Hello@skorm-agency.com"; // Booking via SKORM Agency
-const BOOKING = "ashley.booking.music@gmail.com";
+const AGENCY = "Hello@skorm-agency.com"; // Contact & booking — SKORM Agency
 const SLOGAN = "Escape the mind, Enter the rave";
 
 type Lib = "fa" | "ion" | "feather";
@@ -978,7 +977,7 @@ function Contact() {
   const send = () => {
     buzz(Haptics.ImpactFeedbackStyle.Medium);
     const body = encodeURIComponent(`${msg}\n\n— ${name} (${email})`);
-    openURL(`mailto:${BOOKING}?subject=Contact%20ASHLEY&body=${body}`);
+    openURL(`mailto:${AGENCY}?subject=Contact%20ASHLEY&body=${body}`);
   };
   return (
     <SafeAreaView style={st.safe} edges={["top"]}>
@@ -1011,24 +1010,8 @@ function Contact() {
             <Ionicons name="sparkles" size={18} color={C.white} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={st.mailBubbleLabel}>Booking · SKORM Agency</Text>
+            <Text style={st.mailBubbleLabel}>Contact &amp; booking · SKORM Agency</Text>
             <Text style={st.mailBubbleMail}>{AGENCY}</Text>
-          </View>
-          <Feather name="chevron-right" size={20} color={C.muted} />
-        </Pressable>
-        <Pressable
-          style={[st.mailBubble, { marginTop: 10 }]}
-          onPress={() => {
-            buzz();
-            openURL(`mailto:${BOOKING}?subject=Contact%20ASHLEY`);
-          }}
-        >
-          <View style={[st.mailBubbleIcon, { backgroundColor: C.pink }]}>
-            <Feather name="mail" size={18} color={C.white} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={st.mailBubbleLabel}>Contact direct</Text>
-            <Text style={st.mailBubbleMail}>{BOOKING}</Text>
           </View>
           <Feather name="chevron-right" size={20} color={C.muted} />
         </Pressable>
@@ -1072,7 +1055,7 @@ function Contact() {
           <View style={{ marginTop: 8 }}>
             <GlowButton label="Envoyer la demande" icon="send" onPress={send} />
           </View>
-          <Text style={st.formMail}>{BOOKING}</Text>
+          <Text style={st.formMail}>{AGENCY}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

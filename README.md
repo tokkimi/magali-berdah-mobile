@@ -31,8 +31,7 @@ npx expo export --platform all
 - Instagram : https://www.instagram.com/ashley.musicoff/
 - TikTok : https://www.tiktok.com/@ashley.musicoff
 - Tous les liens : https://linktr.ee/ashley.musicoff
-- Booking (SKORM Agency) : Hello@skorm-agency.com
-- Contact direct : ashley.booking.music@gmail.com
+- Contact &amp; booking (SKORM Agency) : Hello@skorm-agency.com
 
 > Les extraits pointent vers Instagram, où sont publiés les sets et sorties.
 > Remplacez les liens/visuels par les URLs de streaming définitives (Spotify,
