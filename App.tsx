@@ -194,6 +194,7 @@ const P: Product[] = [
     condition: "Excellent",
   },
 ];
+const BAGS = P.filter((item) => item.category === "Sacs");
 const Stack = createNativeStackNavigator(),
   Tabs = createBottomTabNavigator();
 const money = (n: number) =>
@@ -446,24 +447,24 @@ function Home({ navigation }: any) {
             style={s.heroShade}
           >
             <View style={s.heroTag}>
-              <Text style={s.heroTagText}>L’UNIVERS MAGALI BERDAH</Text>
+          <Text style={s.heroTagText}>SACS DE LUXE AUTHENTIFIÉS</Text>
             </View>
-            <Text style={s.heroTitle}>L’exception{`\n`}à portée de main.</Text>
+            <Text style={s.heroTitle}>Le prochain{`\n`}coup de cœur.</Text>
             <Text style={s.heroSub}>
-              Mode, pièces rares et ventes exclusives sélectionnées pour vous.
+              Achetez votre sac coup de cœur ou enchérissez sur une pièce rare.
             </Text>
             <View style={s.heroActions}>
               <Pressable
                 style={s.goldBtn}
                 onPress={() => navigation.navigate("Catalogue")}
               >
-                <Text style={s.btnText}>DÉCOUVRIR</Text>
+                <Text style={s.btnText}>ACHETER MAINTENANT</Text>
               </Pressable>
               <Pressable
                 style={s.ghostBtn}
                 onPress={() => navigation.navigate("Enchères")}
               >
-                <Text style={s.ghostText}>ENCHÈRES</Text>
+                <Text style={s.ghostText}>ENCHÉRIR</Text>
               </Pressable>
             </View>
           </LinearGradient>
@@ -494,7 +495,7 @@ function Home({ navigation }: any) {
         <Section
           title="Enchères en direct"
           label="DERNIÈRES CHANCES"
-          items={P.filter((x) => x.auction)}
+          items={BAGS.filter((x) => x.auction)}
           navigation={navigation}
         />
         <View style={s.marquee}>
@@ -506,29 +507,27 @@ function Home({ navigation }: any) {
         <Section
           title="La sélection de Magali"
           label="COUPS DE CŒUR"
-          items={[P[4], P[7], P[3]]}
+          items={[BAGS[3], BAGS[4], BAGS[5]]}
           navigation={navigation}
         />
         <Section
-          title="Les iconiques"
+          title="Sacs iconiques"
           label="PIÈCES QUI TRAVERSENT LE TEMPS"
-          items={[P[8], P[9], P[2]]}
+          items={[BAGS[0], BAGS[1], BAGS[2]]}
           navigation={navigation}
         />
         <View style={s.softBanner}>
-          <Ionicons name="sparkles" size={19} color={C.gold} />
+          <Ionicons name="shield-checkmark" size={19} color={C.gold} />
           <View style={{ flex: 1 }}>
-            <Text style={s.softTitle}>Le luxe à moins de 500 €</Text>
-            <Text style={s.softText}>
-              Notre sélection accessible, toujours authentifiée.
-            </Text>
+            <Text style={s.softTitle}>Contrôlé avec Entrupy</Text>
+            <Text style={s.softText}>Toutes nos pièces de luxe sont vérifiées et authentifiées.</Text>
           </View>
-          <Ionicons name="arrow-forward" size={19} color={C.gold} />
+          <Ionicons name="checkmark-circle" size={19} color={C.gold} />
         </View>
         <Section
-          title="Petits plaisirs, grand style"
-          label="MOINS DE 500 €"
-          items={[P[5], P[6], P[10], P[11]]}
+          title="Le luxe, maintenant"
+          label="ACHAT IMMÉDIAT"
+          items={BAGS.filter((item) => !item.auction)}
           navigation={navigation}
         />
         <Editorial navigation={navigation} />
@@ -557,10 +556,10 @@ function Home({ navigation }: any) {
 function Catalogue({ navigation }: any) {
   const [q, setQ] = useState(""),
     [cat, setCat] = useState("Tout");
-  const cats = ["Tout", "Sacs", "Mode", "Montres", "Chaussures"],
-    data = P.filter(
+  const cats = ["Tous les sacs", "Enchères", "Acheter maintenant"],
+    data = BAGS.filter(
       (p) =>
-        (cat === "Tout" || p.category === cat) &&
+        (cat === "Tous les sacs" || (cat === "Enchères" ? p.auction : !p.auction)) &&
         `${p.brand} ${p.title}`.toLowerCase().includes(q.toLowerCase()),
     );
   return (
@@ -1162,10 +1161,10 @@ function Login({ navigation }: any) {
 function LuxuryTabBar({ state, navigation }: any) {
   const icons: any = {
     Accueil: "home",
-    Catalogue: "search",
+    Catalogue: "diamond",
     Favoris: "heart",
     Enchères: "hourglass",
-    Compte: "person",
+    Live: "radio",
   };
   return (
     <View style={s.luxuryBar}>
@@ -1185,7 +1184,7 @@ function LuxuryTabBar({ state, navigation }: any) {
               />
             </View>
             <Text style={[s.navLabel, active && s.navLabelOn]}>
-              {route.name === "Catalogue" ? "Découvrir" : route.name}
+              {route.name === "Catalogue" ? "Exclusivités" : route.name}
             </Text>
             {active && <View style={s.activeLine} />}
           </Pressable>
@@ -1202,9 +1201,9 @@ function TabNav() {
     >
       <Tabs.Screen name="Accueil" component={Home} />
       <Tabs.Screen name="Catalogue" component={Catalogue} />
-      <Tabs.Screen name="Favoris" component={Favorites} />
       <Tabs.Screen name="Enchères" component={Auctions} />
-      <Tabs.Screen name="Compte" component={Account} />
+      <Tabs.Screen name="Live" component={Account} />
+      <Tabs.Screen name="Favoris" component={Favorites} />
     </Tabs.Navigator>
   );
 }
@@ -1253,6 +1252,9 @@ function MobileExperience({ value }: any) {
     </SafeAreaProvider>
   );
 }
+function BrandedLoading() {
+  return <View style={s.splash} accessibilityLabel="Chargement Magali Berdah"><Image source={require("./assets/mb-logo.png")} style={s.splashLogo} /><Text style={s.splashText}>L’EXCEPTION VOUS ATTEND</Text><View style={s.splashLine} /></View>;
+}
 function WebStatusBar() {
   return (
     <View style={s.webStatus}>
@@ -1268,7 +1270,9 @@ function WebStatusBar() {
 export default function App() {
   const { width, height } = useWindowDimensions(),
     [favorites, setFav] = useState(new Set<string>()),
-    [cart, setCart] = useState<Product[]>([]);
+    [cart, setCart] = useState<Product[]>([]),
+    [loading, setLoading] = useState(true);
+  useEffect(() => { const timer = setTimeout(() => setLoading(false), 1300); return () => clearTimeout(timer); }, []);
   const value = useMemo(
     () => ({
       favorites,
@@ -1285,6 +1289,7 @@ export default function App() {
     [favorites, cart],
   );
   const framed = Platform.OS === "web" && width > 620;
+  if (loading) return <BrandedLoading />;
   if (!framed) return <MobileExperience value={value} />;
   return (
     <View style={s.webStage}>
@@ -1300,6 +1305,16 @@ export default function App() {
 }
 
 const s = StyleSheet.create({
+  splash: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: C.cream,
+    gap: 22,
+  },
+  splashLogo: { width: 170, height: 170, resizeMode: "contain" },
+  splashText: { color: "#725b3d", fontSize: 10, fontWeight: "700", letterSpacing: 3 },
+  splashLine: { width: 86, height: 1, backgroundColor: C.gold },
   safe: {
     flex: 1,
     width: "100%",
