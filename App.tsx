@@ -224,7 +224,7 @@ function Header({ navigation, title = "MAGALI BERDAH" }: any) {
       <Pressable onPress={() => navigation.navigate("Search")}>
         <Feather name="search" size={21} />
       </Pressable>
-      <Text style={s.wordmark}>{title}</Text>
+      <Image source={require("./assets/mb-logo.png")} accessibilityLabel="Magali Berdah" style={s.mobileLogo} />
       <Pressable onPress={() => navigation.navigate("Cart")}>
         <Feather name="shopping-bag" size={21} />
         {cart.length > 0 && (
@@ -1323,7 +1323,7 @@ const s = StyleSheet.create({
     backgroundColor: C.cream,
   },
   header: {
-    height: 56,
+    height: 70,
     paddingHorizontal: 20,
     backgroundColor: "rgba(255,253,249,0.46)",
     flexDirection: "row",
@@ -1338,6 +1338,7 @@ const s = StyleSheet.create({
     elevation: 8,
   },
   wordmark: { fontFamily: "serif", fontSize: 16, letterSpacing: 2.4 },
+  mobileLogo: { width: 76, height: 76, resizeMode: "contain" },
   badge: {
     position: "absolute",
     right: -7,
